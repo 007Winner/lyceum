@@ -59,10 +59,10 @@ class AudioManager {
   }
 
   private safelyPlay(audio: HTMLAudioElement) {
-    // Explicitly load the asset before playing. This avoids a race on hosted
-    // browsers where the first play request can arrive before the MP3 has
-    // been attached to the media element's resource selection algorithm.
-    if (audio.readyState === HTMLMediaElement.HAVE_NOTHING) audio.load();
+    // Do not call load() immediately before play(): on a fresh page load that
+    // resets resource selection inside the user gesture and can make the
+    // subsequent play promise reject. The browser will select the preloaded
+    // source itself, and the rejection path below handles autoplay policy.
     const attempt = audio.play();
     attempt.catch(() => this.onBlocked());
   }
