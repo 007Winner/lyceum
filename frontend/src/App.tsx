@@ -1,47 +1,15 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
+const API=import.meta.env.VITE_API_URL??"http://127.0.0.1:8001/api";const order=["plato","aristotle","machiavelli","hume","kant"];
+const info:Record<string,[string,string,string]>={plato:["Plato","athens","plato"],aristotle:["Aristotle","lyceum","aristotle"],machiavelli:["Machiavelli","florence","machiavelli"],hume:["Hume","edinburgh_study","hume"],kant:["Kant","konigsberg","kant"]};
+type Msg={role:"user"|"assistant";content:string;speaker?:string};type State={session_id:string;philosopher:string;philosopher_index:number;persuaded:string[];messages:Msg[];complete:boolean};type Phase="conversation"|"final_concession"|"victory"|"transitioning";
+async function req<T>(p:string,i?:RequestInit){const r=await fetch(API+p,{headers:{"Content-Type":"application/json"},...i});if(!r.ok)throw Error((await r.json()).detail??"The Lyceum is unavailable.");return r.json() as Promise<T>}
+export default function App(){const[state,setState]=useState<State|null>(null);const transcript=useRef<HTMLDivElement>(null);const[shown,setShown]=useState<State|null>(null);const[displayed,setDisplayed]=useState<Msg[]>([]);const[phase,setPhase]=useState<Phase>("conversation");const[draft,setDraft]=useState("");const[busy,setBusy]=useState(false);const[err,setErr]=useState("");const[title,setTitle]=useState(true);const[reveal,setReveal]=useState("");const p=shown?.philosopher??"plato",c=info[p],last=displayed[displayed.length-1];
+useEffect(()=>{setReveal(last?.content??"")},[last?.content]);useEffect(()=>{const el=transcript.current;if(el&&el.scrollHeight-el.scrollTop-el.clientHeight<100)el.scrollTop=el.scrollHeight},[displayed.length,last?.content]);
+async function start(){setBusy(true);try{const s=await req<State>("/sessions",{method:"POST"});setState(s);setShown(s);setDisplayed(s.messages);localStorage.setItem("lyceum-session",s.session_id);setTitle(false)}catch(e){setErr(String(e))}finally{setBusy(false)}}
+async function send(e:FormEvent){e.preventDefault();if(!state||!shown||!draft.trim()||busy||phase!=="conversation")return;const text=draft;const outgoing=shown.philosopher;setDraft("");setBusy(true);try{const x=await req<{state:State;advanced:boolean}>(`/sessions/${state.session_id}/messages`,{method:"POST",body:JSON.stringify({message:text})});const response=x.state.messages[x.state.messages.length-1];const nextMessages:Msg[]=[...displayed,{role:"user",content:text},{role:"assistant",content:response?.content??"",speaker:outgoing}];setState(x.state);if(x.advanced){setShown({...x.state,philosopher:outgoing});setDisplayed(nextMessages);setPhase("final_concession")}else{setShown(x.state);setDisplayed(nextMessages)}}catch(e){setDraft(text);setErr(String(e))}finally{setBusy(false)}}
+function continueVictory(){if(phase==="final_concession")setPhase("victory");else if(phase==="victory"){setPhase("transitioning");window.setTimeout(()=>{if(state?.complete){setTitle(true);setPhase("conversation")}else{setShown(state);setDisplayed([]);setReveal("");setDraft("");setErr("");setPhase("conversation")}},650)}}
+if(title)return <div className="title-screen"><div className="title-card"><small>✦ A PHILOSOPHICAL RPG ✦</small><h1>THE<br/><em>LYCEUM</em></h1><p>Five philosophers. Five conversations.<br/>One question: can you change a great mind?</p><button onClick={start} disabled={busy}>NEW GAME</button>{err&&<b>{err}</b>}</div></div>;
+const placeholder=!last?`${c[0]} awaits your argument.`:"";return <div className={`game scene-${p} phase-${phase}`} style={{backgroundImage:`url(/assets/backgrounds/${c[1]}.png)`}}><main><div className="nameplate">{c[0]}<small>ENCOUNTER {order.indexOf(p)+1} / 5</small></div><img className={`philosopher ${busy?"thinking":""}`} src={`/assets/philosophers/${c[2]}.png`}/><img className="player" src="/assets/player/player_silhouette.png"/><section className="dialogue"><div><b>{last?.role==="user"?"YOU":last?.speaker?info[last.speaker][0]:c[0]}</b><p>{reveal||placeholder}</p>{busy&&<i>•••</i>}</div><form onSubmit={send}><textarea value={draft} onChange={e=>setDraft(e.target.value)} placeholder="Make a case worth reconsidering…" disabled={busy||phase!=="conversation"}/><button disabled={busy||phase!=="conversation"||!draft.trim()}>SPEAK ↗</button></form>{phase==="final_concession"&&<button className="continue" onClick={continueVictory}>CONTINUE</button>}</section></main>{err&&<aside className="error">{err}</aside>}{phase==="victory"&&<div className="modal victory"><div><h2>{c[0].toUpperCase()} WAS PERSUADED!</h2><p>A great mind has reconsidered.</p><button onClick={continueVictory}>CONTINUE</button></div></div>}{phase==="transitioning"&&<div className="modal transition"><div><small>THE NEXT ENCOUNTER</small><h2>{state?.complete?"THE LYCEUM":info[state?.philosopher??"plato"][0].toUpperCase()}</h2></div></div>}</div>}
 
-const API = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
-const philosophers = ["plato", "aristotle", "machiavelli", "hume", "kant"];
-const names: Record<string, string> = { plato: "Plato", aristotle: "Aristotle", machiavelli: "Machiavelli", hume: "Hume", kant: "Kant" };
 
-type Message = { role: "user" | "assistant"; content: string };
-type State = { session_id: string; philosopher: string; philosopher_index: number; persuaded: string[]; messages: Message[]; budget_requests: number; budget_output_tokens: number; complete: boolean };
-type Response = { reply: string; advanced: boolean; belief: string | null; evaluation: { reason: string; persuaded: boolean }; state: State };
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API}${path}`, { headers: { "Content-Type": "application/json" }, ...init });
-  if (!response.ok) throw new Error((await response.json()).detail ?? "The Lyceum is unavailable.");
-  return response.json() as Promise<T>;
-}
-
-function App() {
-  const [state, setState] = useState<State | null>(null);
-  const [draft, setDraft] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-  const currentIndex = state?.philosopher_index ?? 0;
-  const progress = useMemo(() => Math.round(((state?.persuaded.length ?? 0) / philosophers.length) * 100), [state]);
-
-  useEffect(() => { request<State>("/sessions", { method: "POST" }).then(setState).catch((e) => setError(e.message)); }, []);
-
-  async function send(event: FormEvent) {
-    event.preventDefault();
-    if (!state || !draft.trim() || busy) return;
-    setBusy(true); setError("");
-    try {
-      const result = await request<Response>(`/sessions/${state.session_id}/messages`, { method: "POST", body: JSON.stringify({ message: draft }) });
-      setState(result.state); setDraft("");
-    } catch (e) { setError(e instanceof Error ? e.message : "The conversation stalled."); }
-    finally { setBusy(false); }
-  }
-
-  return <div className="shell">
-    <header><div className="brand"><span className="seal">L</span><div><p className="eyebrow">A philosophical conversation game</p><h1>The Lyceum</h1></div></div><div className="counter"><span>RECONSIDERATIONS</span><strong>{state?.persuaded.length ?? 0} / 5</strong></div></header>
-    <main>
-      <section className="map-panel"><div className="panel-label">THE HALL OF MINDS</div><div className="map"><div className="room-grid" />{philosophers.map((person, index) => <div className={`node node-${index} ${index === currentIndex ? "active" : ""} ${state?.persuaded.includes(person) ? "won" : ""}`} key={person}><span className="node-dot">{state?.persuaded.includes(person) ? "✓" : index + 1}</span><span>{names[person]}</span></div>)}<div className="player"><span>YOU</span><i /></div><div className="table" /></div><div className="map-caption"><span className="status-dot" /> You are in the room with <strong>{names[state?.philosopher ?? "plato"]}</strong></div></section>
-      <section className="dialogue-panel"><div className="dialogue-head"><div><p className="eyebrow">THE CURRENT interlocutor</p><h2>{names[state?.philosopher ?? "plato"]}</h2></div><div className="progress"><div><span>THE PATH</span><b>{progress}%</b></div><div className="bar"><i style={{ width: `${progress}%` }} /></div></div></div><div className="transcript">{state?.messages.map((message, index) => <div className={`message ${message.role}`} key={index}><div className="avatar">{message.role === "assistant" ? names[state?.philosopher ?? "plato"].slice(0, 1) : "Y"}</div><div><span className="speaker">{message.role === "assistant" ? names[state?.philosopher ?? "plato"] : "You"}</span><p>{message.content}</p></div></div>)}{busy && <div className="thinking">The philosopher considers your argument…</div>}</div><form onSubmit={send} className="composer"><textarea value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Offer a question, objection, or counterexample…" rows={3} disabled={busy || state?.complete} /><div className="compose-foot"><span>Make a case worth reconsidering.</span><button type="submit" disabled={busy || !draft.trim() || state?.complete}>{busy ? "Thinking…" : "Speak"} <b>↗</b></button></div></form>{error && <div className="error">{error}</div>}{state?.complete && <div className="complete">The five minds have reconsidered. The Lyceum is yours to leave changed.</div>}</section>
-    </main>
-    <footer><span>PORTKEY · {"gpt-6-luna"}</span><span>Every concession must be earned by argument.</span></footer>
-  </div>;
-}
-export default App;
