@@ -6,6 +6,9 @@ import json
 import logging
 import os
 import re
+import csv
+import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -115,7 +118,76 @@ def visible_reply(reply: str) -> str:
     return reply.strip()
 
 
-async def _complete(system: str, messages: list[dict[str, str]], budget: Budget) -> tuple[str, int]:
+USAGE_PATH = ROOT / "analysis" / "token_usage.csv"
+USAGE_FIELDS = [
+    "timestamp", "model", "agent_role", "session_id", "input_tokens",
+    "cached_input_tokens", "cache_write_tokens", "output_tokens", "total_tokens",
+    "estimated_cost_usd", "duration_ms",
+]
+
+
+def _usage_number(usage: Any, *names: str) -> int:
+    for name in names:
+        value = getattr(usage, name, None)
+        if value is not None:
+            try:
+                return int(value)
+            except (TypeError, ValueError):
+                continue
+    return 0
+
+
+def _configured_rate(name: str) -> float | None:
+    raw = os.getenv(name, "").strip()
+    if not raw:
+        return None
+    try:
+        return float(raw)
+    except ValueError:
+        return None
+
+
+def _record_usage(usage: Any, *, agent_role: str, session_id: str | None, duration_ms: float) -> None:
+    """Best-effort metadata logging; never allow telemetry to break a turn."""
+    try:
+        input_tokens = _usage_number(usage, "input_tokens", "prompt_tokens")
+        cached = _usage_number(usage, "cache_read_tokens", "cached_input_tokens", "prompt_cached_tokens")
+        cache_write = _usage_number(usage, "cache_write_tokens", "prompt_cache_write_tokens")
+        output_tokens = _usage_number(usage, "output_tokens", "completion_tokens")
+        total = _usage_number(usage, "total_tokens") or input_tokens + output_tokens
+        input_rate = _configured_rate("LYCEUM_INPUT_RATE_PER_MILLION")
+        cached_rate = _configured_rate("LYCEUM_CACHED_INPUT_RATE_PER_MILLION")
+        output_rate = _configured_rate("LYCEUM_OUTPUT_RATE_PER_MILLION")
+        cost = ""
+        if input_rate is not None and cached_rate is not None and output_rate is not None:
+            uncached = max(0, input_tokens - cached)
+            cost = f"{(uncached * input_rate + cached * cached_rate + cache_write * input_rate + output_tokens * output_rate) / 1_000_000:.10f}"
+        USAGE_PATH.parent.mkdir(parents=True, exist_ok=True)
+        exists = USAGE_PATH.exists()
+        with USAGE_PATH.open("a", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(handle, fieldnames=USAGE_FIELDS)
+            if not exists:
+                writer.writeheader()
+            writer.writerow({
+                "timestamp": datetime.now(timezone.utc).isoformat(), "model": MODEL_NAME,
+                "agent_role": agent_role, "session_id": session_id or "",
+                "input_tokens": input_tokens, "cached_input_tokens": cached,
+                "cache_write_tokens": cache_write, "output_tokens": output_tokens,
+                "total_tokens": total, "estimated_cost_usd": cost,
+                "duration_ms": round(duration_ms, 2),
+            })
+    except Exception as exc:
+        LOGGER.warning("Token usage logging failed: %s", type(exc).__name__)
+
+
+async def _complete(
+    system: str,
+    messages: list[dict[str, str]],
+    budget: Budget,
+    *,
+    agent_role: str = "unknown",
+    session_id: str | None = None,
+) -> tuple[str, int]:
     if client() is None:
         raise AgentCallError("The philosopher service is unavailable because PORTKEY_API_KEY is not configured.")
     if Agent is None or UsageLimits is None:
@@ -137,7 +209,9 @@ async def _complete(system: str, messages: list[dict[str, str]], budget: Budget)
         name="lyceum_philosopher_or_evaluator",
         model_settings={"max_tokens": MAX_OUTPUT_TOKENS},
     )
+    started = time.perf_counter()
     result = await agent.run(user_prompt, usage_limits=UsageLimits(request_limit=1))
+    _record_usage(result.usage, agent_role=agent_role, session_id=session_id, duration_ms=(time.perf_counter() - started) * 1000)
     text = result.output or ""
     usage = result.usage.output_tokens
     budget.output_tokens += usage
@@ -171,7 +245,7 @@ async def philosopher_turn(
         )
     messages = conversation_context(state.messages + [{"role": "user", "content": player_message}])
     try:
-        reply, usage = await _complete(system, messages, budget)
+        reply, usage = await _complete(system, messages, budget, agent_role="philosopher", session_id=state.session_id)
     except Exception as exc:
         LOGGER.error(
             "Philosopher model call failed for philosopher=%s error_type=%s error=%s",
@@ -199,7 +273,13 @@ async def evaluate(state: GameState, player_message: str, reply: str, budget: Bu
         "Return JSON only with persuaded, reason, belief."
     )
     try:
-        raw, _ = await _complete(section("Evaluator"), [{"role": "user", "content": prompt}], budget)
+        raw, _ = await _complete(
+            section("Evaluator"),
+            [{"role": "user", "content": prompt}],
+            budget,
+            agent_role="evaluator",
+            session_id=state.session_id,
+        )
         data = json.loads(raw[raw.find("{") : raw.rfind("}") + 1])
         if isinstance(data, dict):
             return {

@@ -6,6 +6,9 @@ node_modules/
 dist/
 output/*.json
 output/*.jsonl
+output/*.log
+output/*.cmd
+analysis/token_usage.csv
 !output/corpus_demo.json
 !output/model_conversation_tests.json
 !output/open_conversation_test.json

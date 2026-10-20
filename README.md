@@ -1,5 +1,7 @@
 # The Lyceum
 
+Repository: https://github.com/007Winner/lyceum
+
 The Lyceum is a philosophical conversation game for people who want to practice
 making and revising arguments. Five independent philosopher agentsâ€”Plato,
 Aristotle, Machiavelli, Hume, and Kantâ€”hold open-ended conversations. A player
@@ -29,6 +31,7 @@ substantive reconsideration.
    ```powershell
    cd frontend
    npm install
+   $env:VITE_API_URL="http://127.0.0.1:8000/api"
    npm run dev -- --host 127.0.0.1
    ```
 
@@ -87,6 +90,17 @@ The API exposes `GET /api/health`, `POST /api/sessions`,
 See [report.html](report.html) for the architecture, cost model, safety design,
 and a reproducible walkthrough. [slides.html](slides.html) is a short reveal.js
 deck for a live presentation.
+
+## Tokenomics analysis
+
+`analysis/analyze_costs.py` reads the locally generated `analysis/token_usage.csv`
+and writes `analysis/tokenomics_summary.md`, `analysis/tokenomics_chart.png`, and
+`analysis/tokenomics_report.html`. The CSV is ignored because it contains
+session metadata. Model calls log input, cache-read, cache-write, output, total
+tokens, duration, role, and model without storing prompts or responses. Exact
+costs remain blank unless verified rates are supplied through
+`LYCEUM_INPUT_RATE_PER_MILLION`, `LYCEUM_CACHED_INPUT_RATE_PER_MILLION`, and
+`LYCEUM_OUTPUT_RATE_PER_MILLION`.
 
 
 
