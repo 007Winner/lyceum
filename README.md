@@ -8,6 +8,11 @@ Aristotle, Machiavelli, Hume, and Kantâ€”hold open-ended conversations. A p
 advances only when the philosopher's response and a separate evaluator support a
 substantive reconsideration.
 
+## Online demo
+
+It is highly encouraged to play The Lyceum online at
+[https://the-lyceum-pied.vercel.app/](https://the-lyceum-pied.vercel.app/).
+
 ## Run locally
 
 1. From this folder, create the required virtual environment and install Python dependencies:

@@ -13,3 +13,5 @@ analysis/token_usage.csv
 !output/model_conversation_tests.json
 !output/open_conversation_test.json
 !output/evaluator_progression_test.json
+.vercel
+.env*
