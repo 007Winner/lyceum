@@ -16,6 +16,7 @@ const DEFAULT_VOLUME = 0.22;
 // Versioned keys reset preferences saved by the earlier unreliable player so
 // the hosted site starts audible instead of inheriting a stuck mute/zero volume.
 const VOLUME_KEY = "lyceum-music-volume-v2";
+const MUTED_KEY = "lyceum-music-muted-v2";
 
 type ActiveTrack = { philosopher: MusicPhilosopher; audio: HTMLAudioElement };
 
@@ -25,9 +26,9 @@ function readVolume() {
 }
 
 function readMuted() {
-  // Music is intentionally off at the start of every page load. The toggle
-  // remains available for the current run, but its state is never persisted.
-  return true;
+  const stored = localStorage.getItem(MUTED_KEY);
+  // New players start muted; an explicit preference survives refreshes.
+  return stored === null ? true : stored === "true";
 }
 
 class AudioManager {
@@ -145,6 +146,7 @@ class AudioManager {
 
   setMuted(muted: boolean) {
     this.muted = muted;
+    localStorage.setItem(MUTED_KEY, String(muted));
     if (this.active && this.frame === null) this.active.audio.volume = this.level();
   }
 
