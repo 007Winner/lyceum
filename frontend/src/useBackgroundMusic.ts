@@ -54,9 +54,7 @@ class AudioManager {
 
   private safelyPlay(audio: HTMLAudioElement) {
     const attempt = audio.play();
-    attempt.catch((error: unknown) => {
-      if (error instanceof DOMException && error.name === "NotAllowedError") this.onBlocked();
-    });
+    attempt.catch(() => this.onBlocked());
   }
 
   private silenceStale(keep: HTMLAudioElement | null) {
@@ -158,16 +156,19 @@ export function useBackgroundMusic(
   shouldPlay: boolean,
   fadeOut = false,
 ) {
-  const [volume, setVolumeState] = useState(DEFAULT_VOLUME);
-  const [muted, setMutedState] = useState(false);
+  const [volume, setVolumeState] = useState(() => readVolume());
+  const [muted, setMutedState] = useState(() => readMuted());
   const [missing, setMissing] = useState<MusicPhilosopher | null>(null);
   const [blocked, setBlocked] = useState(false);
   const manager = useRef<AudioManager | null>(null);
 
-  useEffect(() => {
-    setVolumeState(readVolume());
-    setMutedState(readMuted());
+  // Initialize synchronously so a very fast START GAME click cannot beat the
+  // effect that would otherwise create the audio manager.
+  if (!manager.current) {
     manager.current = new AudioManager((track) => setMissing(track), () => setBlocked(true));
+  }
+
+  useEffect(() => {
     return () => manager.current?.dispose();
   }, []);
 
