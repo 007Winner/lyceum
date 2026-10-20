@@ -26,7 +26,9 @@ function readVolume() {
 }
 
 function readMuted() {
-  return localStorage.getItem(MUTED_KEY) === "true";
+  const stored = localStorage.getItem(MUTED_KEY);
+  // Start new players silently; an explicit user preference always wins.
+  return stored === null ? true : stored === "true";
 }
 
 class AudioManager {
