@@ -11,8 +11,10 @@ export const MUSIC_TRACKS: Record<MusicPhilosopher, string> = {
 };
 
 const DEFAULT_VOLUME = 0.22;
-const VOLUME_KEY = "lyceum-music-volume";
-const MUTED_KEY = "lyceum-music-muted";
+// Versioned keys reset preferences saved by the earlier unreliable player so
+// the hosted site starts audible instead of inheriting a stuck mute/zero volume.
+const VOLUME_KEY = "lyceum-music-volume-v2";
+const MUTED_KEY = "lyceum-music-muted-v2";
 
 type ActiveTrack = { philosopher: MusicPhilosopher; audio: HTMLAudioElement };
 
