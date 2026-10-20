@@ -1,0 +1,322 @@
+[
+  {
+    "philosopher": "plato",
+    "player_message": "justice in a city",
+    "retrieved_passages": [
+      {
+        "work": "The Republic",
+        "chunk_id": "plato:republic:00470",
+        "source_url": "https://www.gutenberg.org/cache/epub/1497/pg1497.txt"
+      },
+      {
+        "work": "The Republic",
+        "chunk_id": "plato:republic:00073",
+        "source_url": "https://www.gutenberg.org/cache/epub/1497/pg1497.txt"
+      },
+      {
+        "work": "The Republic",
+        "chunk_id": "plato:republic:00481",
+        "source_url": "https://www.gutenberg.org/cache/epub/1497/pg1497.txt"
+      }
+    ],
+    "how_used": "reference-only context supplied to the philosopher prompt; evaluator receives no corpus text"
+  },
+  {
+    "philosopher": "plato",
+    "player_message": "Socrates and the examined life",
+    "retrieved_passages": [
+      {
+        "work": "Apology",
+        "chunk_id": "plato:apology:00054",
+        "source_url": "https://www.gutenberg.org/cache/epub/1656/pg1656.txt"
+      },
+      {
+        "work": "Apology",
+        "chunk_id": "plato:apology:00042",
+        "source_url": "https://www.gutenberg.org/cache/epub/1656/pg1656.txt"
+      }
+    ],
+    "how_used": "reference-only context supplied to the philosopher prompt; evaluator receives no corpus text"
+  },
+  {
+    "philosopher": "plato",
+    "player_message": "love and beauty",
+    "retrieved_passages": [
+      {
+        "work": "Symposium",
+        "chunk_id": "plato:symposium:00013",
+        "source_url": "https://www.gutenberg.org/cache/epub/1600/pg1600.txt"
+      },
+      {
+        "work": "The Republic",
+        "chunk_id": "plato:republic:00546",
+        "source_url": "https://www.gutenberg.org/cache/epub/1497/pg1497.txt"
+      },
+      {
+        "work": "Symposium",
+        "chunk_id": "plato:symposium:00080",
+        "source_url": "https://www.gutenberg.org/cache/epub/1600/pg1600.txt"
+      }
+    ],
+    "how_used": "reference-only context supplied to the philosopher prompt; evaluator receives no corpus text"
+  },
+  {
+    "philosopher": "aristotle",
+    "player_message": "virtue habit happiness",
+    "retrieved_passages": [
+      {
+        "work": "Politics: A Treatise on Government",
+        "chunk_id": "aristotle:politics:00223",
+        "source_url": "https://www.gutenberg.org/cache/epub/6762/pg6762.txt"
+      },
+      {
+        "work": "The Nicomachean Ethics",
+        "chunk_id": "aristotle:nicomachean-ethics:00251",
+        "source_url": "https://www.gutenberg.org/cache/epub/8438/pg8438.txt"
+      },
+      {
+        "work": "Politics: A Treatise on Government",
+        "chunk_id": "aristotle:politics:00227",
+        "source_url": "https://www.gutenberg.org/cache/epub/6762/pg6762.txt"
+      }
+    ],
+    "how_used": "reference-only context supplied to the philosopher prompt; evaluator receives no corpus text"
+  },
+  {
+    "philosopher": "aristotle",
+    "player_message": "citizenship and constitutions",
+    "retrieved_passages": [
+      {
+        "work": "The Nicomachean Ethics",
+        "chunk_id": "aristotle:nicomachean-ethics:00104",
+        "source_url": "https://www.gutenberg.org/cache/epub/8438/pg8438.txt"
+      },
+      {
+        "work": "Politics: A Treatise on Government",
+        "chunk_id": "aristotle:politics:00083",
+        "source_url": "https://www.gutenberg.org/cache/epub/6762/pg6762.txt"
+      },
+      {
+        "work": "The Nicomachean Ethics",
+        "chunk_id": "aristotle:nicomachean-ethics:00391",
+        "source_url": "https://www.gutenberg.org/cache/epub/8438/pg8438.txt"
+      }
+    ],
+    "how_used": "reference-only context supplied to the philosopher prompt; evaluator receives no corpus text"
+  },
+  {
+    "philosopher": "aristotle",
+    "player_message": "tragedy and imitation",
+    "retrieved_passages": [
+      {
+        "work": "The Poetics of Aristotle",
+        "chunk_id": "aristotle:poetics:00012",
+        "source_url": "https://www.gutenberg.org/cache/epub/1974/pg1974.txt"
+      },
+      {
+        "work": "The Poetics of Aristotle",
+        "chunk_id": "aristotle:poetics:00001",
+        "source_url": "https://www.gutenberg.org/cache/epub/1974/pg1974.txt"
+      },
+      {
+        "work": "The Poetics of Aristotle",
+        "chunk_id": "aristotle:poetics:00013",
+        "source_url": "https://www.gutenberg.org/cache/epub/1974/pg1974.txt"
+      }
+    ],
+    "how_used": "reference-only context supplied to the philosopher prompt; evaluator receives no corpus text"
+  },
+  {
+    "philosopher": "machiavelli",
+    "player_message": "fortune and virtù",
+    "retrieved_passages": [
+      {
+        "work": "The Prince",
+        "chunk_id": "machiavelli:the-prince:00171",
+        "source_url": "https://www.gutenberg.org/cache/epub/1232/pg1232.txt"
+      },
+      {
+        "work": "Discourses on the First Decade of Titus Livius",
+        "chunk_id": "machiavelli:discourses-on-livy:00410",
+        "source_url": "https://www.gutenberg.org/cache/epub/10827/pg10827.txt"
+      },
+      {
+        "work": "The Prince",
+        "chunk_id": "machiavelli:the-prince:00197",
+        "source_url": "https://www.gutenberg.org/cache/epub/1232/pg1232.txt"
+      }
+    ],
+    "how_used": "reference-only context supplied to the philosopher prompt; evaluator receives no corpus text"
+  },
+  {
+    "philosopher": "machiavelli",
+    "player_message": "arms and rulers",
+    "retrieved_passages": [
+      {
+        "work": "Discourses on the First Decade of Titus Livius",
+        "chunk_id": "machiavelli:discourses-on-livy:00361",
+        "source_url": "https://www.gutenberg.org/cache/epub/10827/pg10827.txt"
+      },
+      {
+        "work": "The Prince",
+        "chunk_id": "machiavelli:the-prince:00002",
+        "source_url": "https://www.gutenberg.org/cache/epub/1232/pg1232.txt"
+      },
+      {
+        "work": "Discourses on the First Decade of Titus Livius",
+        "chunk_id": "machiavelli:discourses-on-livy:00485",
+        "source_url": "https://www.gutenberg.org/cache/epub/10827/pg10827.txt"
+      }
+    ],
+    "how_used": "reference-only context supplied to the philosopher prompt; evaluator receives no corpus text"
+  },
+  {
+    "philosopher": "machiavelli",
+    "player_message": "republics and conflict",
+    "retrieved_passages": [
+      {
+        "work": "Discourses on the First Decade of Titus Livius",
+        "chunk_id": "machiavelli:discourses-on-livy:00036",
+        "source_url": "https://www.gutenberg.org/cache/epub/10827/pg10827.txt"
+      },
+      {
+        "work": "Discourses on the First Decade of Titus Livius",
+        "chunk_id": "machiavelli:discourses-on-livy:00088",
+        "source_url": "https://www.gutenberg.org/cache/epub/10827/pg10827.txt"
+      }
+    ],
+    "how_used": "reference-only context supplied to the philosopher prompt; evaluator receives no corpus text"
+  },
+  {
+    "philosopher": "hume",
+    "player_message": "cause effect experience",
+    "retrieved_passages": [
+      {
+        "work": "A Treatise of Human Nature",
+        "chunk_id": "hume:treatise-of-human-nature:00311",
+        "source_url": "https://www.gutenberg.org/cache/epub/4705/pg4705.txt"
+      },
+      {
+        "work": "An Enquiry Concerning Human Understanding",
+        "chunk_id": "hume:enquiry-concerning-human-understanding:00250",
+        "source_url": "https://www.gutenberg.org/cache/epub/9662/pg9662.txt"
+      },
+      {
+        "work": "A Treatise of Human Nature",
+        "chunk_id": "hume:treatise-of-human-nature:00246",
+        "source_url": "https://www.gutenberg.org/cache/epub/4705/pg4705.txt"
+      }
+    ],
+    "how_used": "reference-only context supplied to the philosopher prompt; evaluator receives no corpus text"
+  },
+  {
+    "philosopher": "hume",
+    "player_message": "custom and belief",
+    "retrieved_passages": [
+      {
+        "work": "An Enquiry Concerning Human Understanding",
+        "chunk_id": "hume:enquiry-concerning-human-understanding:00252",
+        "source_url": "https://www.gutenberg.org/cache/epub/9662/pg9662.txt"
+      },
+      {
+        "work": "A Treatise of Human Nature",
+        "chunk_id": "hume:treatise-of-human-nature:00190",
+        "source_url": "https://www.gutenberg.org/cache/epub/4705/pg4705.txt"
+      },
+      {
+        "work": "A Treatise of Human Nature",
+        "chunk_id": "hume:treatise-of-human-nature:00186",
+        "source_url": "https://www.gutenberg.org/cache/epub/4705/pg4705.txt"
+      }
+    ],
+    "how_used": "reference-only context supplied to the philosopher prompt; evaluator receives no corpus text"
+  },
+  {
+    "philosopher": "hume",
+    "player_message": "design and natural religion",
+    "retrieved_passages": [
+      {
+        "work": "Dialogues Concerning Natural Religion",
+        "chunk_id": "hume:dialogues-concerning-natural-religion:00094",
+        "source_url": "https://www.gutenberg.org/cache/epub/4583/pg4583.txt"
+      },
+      {
+        "work": "Dialogues Concerning Natural Religion",
+        "chunk_id": "hume:dialogues-concerning-natural-religion:00077",
+        "source_url": "https://www.gutenberg.org/cache/epub/4583/pg4583.txt"
+      },
+      {
+        "work": "Dialogues Concerning Natural Religion",
+        "chunk_id": "hume:dialogues-concerning-natural-religion:00052",
+        "source_url": "https://www.gutenberg.org/cache/epub/4583/pg4583.txt"
+      }
+    ],
+    "how_used": "reference-only context supplied to the philosopher prompt; evaluator receives no corpus text"
+  },
+  {
+    "philosopher": "kant",
+    "player_message": "duty universal law",
+    "retrieved_passages": [
+      {
+        "work": "Fundamental Principles of the Metaphysic of Morals",
+        "chunk_id": "kant:groundwork-of-the-metaphysics-of-morals:00067",
+        "source_url": "https://www.gutenberg.org/cache/epub/5682/pg5682.txt"
+      },
+      {
+        "work": "Fundamental Principles of the Metaphysic of Morals",
+        "chunk_id": "kant:groundwork-of-the-metaphysics-of-morals:00062",
+        "source_url": "https://www.gutenberg.org/cache/epub/5682/pg5682.txt"
+      },
+      {
+        "work": "Fundamental Principles of the Metaphysic of Morals",
+        "chunk_id": "kant:groundwork-of-the-metaphysics-of-morals:00087",
+        "source_url": "https://www.gutenberg.org/cache/epub/5682/pg5682.txt"
+      }
+    ],
+    "how_used": "reference-only context supplied to the philosopher prompt; evaluator receives no corpus text"
+  },
+  {
+    "philosopher": "kant",
+    "player_message": "space and time knowledge",
+    "retrieved_passages": [
+      {
+        "work": "The Critique of Pure Reason",
+        "chunk_id": "kant:critique-of-pure-reason:00021",
+        "source_url": "https://www.gutenberg.org/cache/epub/4280/pg4280.txt"
+      },
+      {
+        "work": "Kant's Prolegomena to Any Future Metaphysics",
+        "chunk_id": "kant:prolegomena:00184",
+        "source_url": "https://www.gutenberg.org/cache/epub/52821/pg52821.txt"
+      },
+      {
+        "work": "The Critique of Pure Reason",
+        "chunk_id": "kant:critique-of-pure-reason:00731",
+        "source_url": "https://www.gutenberg.org/cache/epub/4280/pg4280.txt"
+      }
+    ],
+    "how_used": "reference-only context supplied to the philosopher prompt; evaluator receives no corpus text"
+  },
+  {
+    "philosopher": "kant",
+    "player_message": "Prolegomena metaphysics science",
+    "retrieved_passages": [
+      {
+        "work": "Kant's Prolegomena to Any Future Metaphysics",
+        "chunk_id": "kant:prolegomena:00000",
+        "source_url": "https://www.gutenberg.org/cache/epub/52821/pg52821.txt"
+      },
+      {
+        "work": "Kant's Prolegomena to Any Future Metaphysics",
+        "chunk_id": "kant:prolegomena:00048",
+        "source_url": "https://www.gutenberg.org/cache/epub/52821/pg52821.txt"
+      },
+      {
+        "work": "Kant's Prolegomena to Any Future Metaphysics",
+        "chunk_id": "kant:prolegomena:00046",
+        "source_url": "https://www.gutenberg.org/cache/epub/52821/pg52821.txt"
+      }
+    ],
+    "how_used": "reference-only context supplied to the philosopher prompt; evaluator receives no corpus text"
+  }
+]

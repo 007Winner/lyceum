@@ -1,0 +1,12 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+node_modules/
+dist/
+output/*.json
+output/*.jsonl
+!output/corpus_demo.json
+!output/model_conversation_tests.json
+!output/open_conversation_test.json
+!output/evaluator_progression_test.json
