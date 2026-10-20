@@ -3,7 +3,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 export type MusicPhilosopher = "plato" | "aristotle" | "machiavelli" | "hume" | "kant";
 
 export const MUSIC_TRACKS: Record<MusicPhilosopher, string> = {
-  plato: "/audio/plato.mp3",
+  // Bump Plato's asset URL so browsers and Vercel's edge cache do not reuse
+  // the previously cached copy that failed to start on the title-screen click.
+  plato: "/audio/plato.mp3?v=2",
   aristotle: "/audio/aristotle.mp3",
   machiavelli: "/audio/machiavelli.mp3",
   hume: "/audio/hume.mp3",
