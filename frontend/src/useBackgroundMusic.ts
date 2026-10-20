@@ -27,6 +27,7 @@ function readMuted() {
 
 class AudioManager {
   private active: ActiveTrack | null = null;
+  private audios = new Set<HTMLAudioElement>();
   private frame: number | null = null;
   private volume: number;
   private muted: boolean;
@@ -58,6 +59,16 @@ class AudioManager {
     });
   }
 
+  private silenceStale(keep: HTMLAudioElement | null) {
+    for (const audio of this.audios) {
+      if (audio === keep) continue;
+      audio.pause();
+      audio.currentTime = 0;
+      audio.volume = 0;
+      this.audios.delete(audio);
+    }
+  }
+
   play(philosopher: MusicPhilosopher, duration = 1500) {
     if (this.active?.philosopher === philosopher) {
       if (this.active.audio.paused) this.safelyPlay(this.active.audio);
@@ -66,11 +77,13 @@ class AudioManager {
 
     this.cancelFade();
     const old = this.active;
+    this.silenceStale(old?.audio ?? null);
     const next = new Audio(MUSIC_TRACKS[philosopher]);
     next.loop = true;
     next.preload = "auto";
     next.volume = 0;
     next.addEventListener("error", () => this.onMissing(philosopher), { once: true });
+    this.audios.add(next);
     this.active = { philosopher, audio: next };
     this.safelyPlay(next);
 
@@ -86,6 +99,7 @@ class AudioManager {
         if (old) {
           old.audio.pause();
           old.audio.currentTime = 0;
+          this.audios.delete(old.audio);
         }
         this.frame = null;
       }
@@ -97,6 +111,7 @@ class AudioManager {
     if (!this.active) return;
     this.cancelFade();
     const track = this.active;
+    this.silenceStale(track.audio);
     const started = performance.now();
     const initial = track.audio.volume;
     const fade = (now: number) => {
@@ -107,6 +122,7 @@ class AudioManager {
       } else {
         track.audio.pause();
         track.audio.currentTime = 0;
+        this.audios.delete(track.audio);
         if (this.active === track) this.active = null;
         this.frame = null;
       }
@@ -128,11 +144,12 @@ class AudioManager {
 
   dispose() {
     this.cancelFade();
-    if (this.active) {
-      this.active.audio.pause();
-      this.active.audio.src = "";
-      this.active = null;
+    for (const audio of this.audios) {
+      audio.pause();
+      audio.src = "";
     }
+    this.audios.clear();
+    this.active = null;
   }
 }
 
