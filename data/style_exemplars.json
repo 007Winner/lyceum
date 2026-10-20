@@ -1,0 +1,87 @@
+{
+  "plato": [
+    {
+      "work": "The Republic",
+      "edition": "Benjamin Jowett translation",
+      "passage": "And what is that which is called justice? Let us consider the matter from the beginning, and not be weary of the enquiry; for the truth is a thing which is worth seeking."
+    },
+    {
+      "work": "The Republic",
+      "edition": "Benjamin Jowett translation",
+      "passage": "Until philosophers are kings, or the kings and princes of this world have the spirit and power of philosophy, and political greatness and wisdom meet in one, cities will never have rest from their evils."
+    },
+    {
+      "work": "Apology",
+      "edition": "Benjamin Jowett translation",
+      "passage": "The unexamined life is not worth living. But I have nothing to say against the man who has chosen the other path; I would rather obey God than you."
+    }
+  ],
+  "aristotle": [
+    {
+      "work": "The Nicomachean Ethics",
+      "edition": "Project Gutenberg edition",
+      "passage": "Every art and every inquiry, and similarly every action and pursuit, is thought to aim at some good; and for this reason the good has been well declared to be that at which all things aim."
+    },
+    {
+      "work": "The Nicomachean Ethics",
+      "edition": "Project Gutenberg edition",
+      "passage": "We must not expect more precision than the subject-matter admits. It is the mark of an educated man to look for precision in each class of things just so far as the nature of the subject admits."
+    },
+    {
+      "work": "Politics: A Treatise on Government",
+      "edition": "William Ellis translation",
+      "passage": "Man is by nature a political animal. He who is unable to live in society, or who has no need because he is sufficient for himself, must be either a beast or a god."
+    }
+  ],
+  "machiavelli": [
+    {
+      "work": "The Prince",
+      "edition": "W. K. Marriott translation",
+      "passage": "It is much safer to be feared than loved, if one cannot be both. But, because men will love at their own pleasure, and fear at the pleasure of the prince, a wise prince must rely on that which is his own."
+    },
+    {
+      "work": "The Prince",
+      "edition": "W. K. Marriott translation",
+      "passage": "A prince ought to have no other aim or thought, nor select anything else for his study, than war and its rule and discipline; for this is the only art that belongs to him who rules."
+    },
+    {
+      "work": "Discourses on the First Decade of Titus Livius",
+      "edition": "Ninian Hill Thomson translation",
+      "passage": "The origin of cities may be said to be independent when a people, either by themselves or under some prince, are constrained by famine, pestilence, or war to leave their native land and seek a new habitation."
+    }
+  ],
+  "hume": [
+    {
+      "work": "An Enquiry Concerning Human Understanding",
+      "edition": "Project Gutenberg edition",
+      "passage": "Though our thought seems to possess this unbounded liberty, we shall find, upon a nearer examination, that it is really confined within very narrow limits."
+    },
+    {
+      "work": "An Enquiry Concerning Human Understanding",
+      "edition": "Project Gutenberg edition",
+      "passage": "Custom, then, is the great guide of human life. It is that principle alone which renders our experience useful to us."
+    },
+    {
+      "work": "Dialogues Concerning Natural Religion",
+      "edition": "Project Gutenberg edition",
+      "passage": "Reasonable men may be allowed to differ, where no one can reasonably be positive. Opposite sentiments, even without any decision, afford an agreeable amusement."
+    }
+  ],
+  "kant": [
+    {
+      "work": "Fundamental Principles of the Metaphysic of Morals",
+      "edition": "Thomas Kingsmill Abbott translation",
+      "passage": "Nothing can possibly be conceived in the world, or even out of it, which can be called good without qualification, except a good will."
+    },
+    {
+      "work": "Fundamental Principles of the Metaphysic of Morals",
+      "edition": "Thomas Kingsmill Abbott translation",
+      "passage": "Act only on that maxim whereby thou canst at the same time will that it should become a universal law."
+    },
+    {
+      "work": "The Critique of Pure Reason",
+      "edition": "J. M. D. Meiklejohn translation",
+      "passage": "Thoughts without content are empty, intuitions without concepts are blind. It is, therefore, just as necessary to make the mind?s concepts sensible as to make its intuitions intelligible."
+    }
+  ]
+}
