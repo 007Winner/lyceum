@@ -55,6 +55,10 @@ class AudioManager {
   }
 
   private safelyPlay(audio: HTMLAudioElement) {
+    // Explicitly load the asset before playing. This avoids a race on hosted
+    // browsers where the first play request can arrive before the MP3 has
+    // been attached to the media element's resource selection algorithm.
+    if (audio.readyState === HTMLMediaElement.HAVE_NOTHING) audio.load();
     const attempt = audio.play();
     attempt.catch(() => this.onBlocked());
   }
@@ -173,6 +177,25 @@ export function useBackgroundMusic(
   useEffect(() => {
     return () => manager.current?.dispose();
   }, []);
+
+  // A deployment may be opened without a user gesture. If the browser blocks
+  // that first autoplay attempt, retry the current track on the first real
+  // interaction anywhere in the document (the game already exposes the same
+  // retry through its music control).
+  useEffect(() => {
+    const retry = () => {
+      if (manager.current && philosopher && shouldPlay && !fadeOut) {
+        setBlocked(false);
+        manager.current.play(philosopher);
+      }
+    };
+    window.addEventListener("pointerdown", retry, { passive: true });
+    window.addEventListener("keydown", retry, { passive: true });
+    return () => {
+      window.removeEventListener("pointerdown", retry);
+      window.removeEventListener("keydown", retry);
+    };
+  }, [fadeOut, philosopher, shouldPlay]);
 
   useEffect(() => {
     if (fadeOut || !shouldPlay || !philosopher) manager.current?.stop();
