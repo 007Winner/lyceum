@@ -1,7 +1,7 @@
 ﻿import { FormEvent, useEffect, useRef, useState } from "react";
 import { MusicPhilosopher, useBackgroundMusic } from "./useBackgroundMusic";
 const API=import.meta.env.VITE_API_URL??"http://127.0.0.1:8001/api";const order:MusicPhilosopher[]=["plato","aristotle","machiavelli","hume","kant"];
-const info:Record<string,[string,string,string]>={plato:["Plato","athens","plato"],aristotle:["Aristotle","lyceum","aristotle"],machiavelli:["Machiavelli","florence","machiavelli"],hume:["Hume","edinburgh_study","hume"],kant:["Kant","konigsberg","kant"]};
+const info:Record<string,[string,string,string]>={plato:["Plato","athens","plato"],aristotle:["Aristotle","lyceum","aristotle"],machiavelli:["Machiavelli","florence","machiavelli"],hume:["Hume","edinburgh","hume"],kant:["Kant","konigsburg","kant"]};
 const HOW_TO_PLAY=[
   "Welcome to The Lyceum, where the greatest minds in philosophy are waiting to meet you.",
   "Your journey will take you through five encounters with Plato, Aristotle, Machiavelli, David Hume, and Immanuel Kant.",

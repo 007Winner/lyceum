@@ -1,45 +1,321 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Libre+Baskerville:wght@400;700&display=swap');
-:root{font-family:'DM Mono',monospace;color:#f7e8c9;background:#0c0a12}*{box-sizing:border-box}html,body,#root{width:100%;height:100%;margin:0;overflow:hidden}body{min-width:320px}button,textarea{font:inherit}
-.title-screen,.ending{width:100%;height:100%;display:grid;place-items:center;text-align:center;background:linear-gradient(#19172fcc,#100d15),url('/assets/backgrounds/athens.png') center/cover}.title-card{padding:clamp(28px,5vw,60px);background:#12101ddd;border:2px solid #c79b55;box-shadow:0 0 0 8px #201a25aa,0 25px 80px #000}.title-card small,.ending small{color:#d2aa62;letter-spacing:.2em}.title-card h1,.ending h1{font:700 clamp(44px,8vw,105px)/.82 'Libre Baskerville';letter-spacing:.05em;margin:28px 0}.title-card h1 em{color:#d7ab5e;font-style:normal}.title-card p,.ending p{line-height:1.7;color:#d4bea0}.title-card button,.ending button{display:block;width:240px;margin:16px auto;padding:13px;border:1px solid #d1a155;background:#7c2940;color:#fff0d4;cursor:pointer}.title-card button:disabled{opacity:.35}
-.game{position:relative;width:min(100vw,177.7778vh);height:min(100vh,56.25vw);margin:auto;overflow:hidden;background-color:#171426;background-repeat:no-repeat;background-position:center;background-size:contain;color:#fff0d5}.game:before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,#08081266 0%,transparent 48%,#0d0a12bb 100%);pointer-events:none}.game>*{position:relative;z-index:1}.hud{position:absolute;z-index:5;top:0;left:0;right:0;height:10%;padding:0 3%;display:flex;align-items:center;gap:2%;border-bottom:1px solid #ead19d55;background:#100d16bb}.hud strong{color:#e0b762;font-size:clamp(10px,1.2vw,16px);white-space:nowrap}.hud nav{display:flex;justify-content:center;gap:clamp(7px,1.5vw,22px);flex:1;min-width:0;overflow:hidden}.hud nav span{font-size:clamp(8px,1vw,13px);white-space:nowrap;color:#b5a395}.hud nav span.current{color:#ffe4a6;text-shadow:0 0 10px #f7c963}.hud nav span.done{color:#8dd18f}.hud button{background:#2a1b28aa;border:1px solid #c5995d;color:#f7d799;padding:.55em 1em;cursor:pointer}
-.game main{position:absolute;inset:0}.nameplate{position:absolute;z-index:3;top:17%;right:8%;padding:1.2% 2%;background:#171225dd;border:2px solid #d9ad62;font:700 clamp(16px,2.4vw,32px) 'Libre Baskerville'}.nameplate small{display:block;color:#c9a96c;font:clamp(8px, .8vw, 12px) 'DM Mono';margin-top:5px}.philosopher{position:absolute;z-index:2;right:16%;bottom:28%;height:48%;max-width:38%;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 2% 1% #09070acc);animation:idle 3s ease-in-out infinite}.philosopher.thinking{animation:think .7s ease-in-out infinite}.player{position:absolute;z-index:2;left:7%;bottom:22%;height:30%;max-width:26%;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 2% 1% #05040a)}@keyframes idle{50%{transform:translateY(-.7%)}}@keyframes think{50%{transform:translateX(.6%)}}
-.dialogue{position:absolute;z-index:4;left:4%;right:4%;bottom:3%;height:27%;min-height:0;padding:1%;display:flex;flex-direction:column;background:#f1dfb8;color:#161526;border:clamp(3px,.4vw,6px) solid #171427;box-shadow:0 0 0 2px #d0a75d,10px 12px 0 #08070caa}.dialogue>div{flex:1;min-height:0;overflow:auto;padding:.3% 1%}.dialogue b{color:#8b2940;font-size:clamp(9px,1vw,13px);letter-spacing:.12em}.dialogue p{font:clamp(11px,1.25vw,17px)/1.45 'Libre Baskerville';white-space:pre-wrap;margin:.5em 0}.dialogue form{display:flex;gap:1%;height:34%;min-height:38px;margin-top:.5%}.dialogue textarea{flex:1;min-width:0;resize:none;border:2px solid #9e8254;background:#fff4d5;padding:8px;color:#191526;font-size:clamp(11px,1vw,14px)}.dialogue form button{width:auto;margin:0;padding:0 2%;border:1px solid #d1a155;background:#722b42;color:#fff0d4;cursor:pointer}.error{position:absolute;z-index:8;left:4%;bottom:1%;background:#5d2030;padding:8px}.modal{position:absolute;z-index:10;inset:0;display:grid;place-items:center;background:#090710bb}.modal>div{width:min(650px,85%);max-height:80%;overflow:auto;background:#f1dfb8;color:#191526;padding:clamp(18px,3vw,35px);border:5px solid #1a1729;box-shadow:0 0 0 2px #d0a75d}.modal button{padding:10px;background:#762b43;color:#fff;border:0}.history p{padding:8px;border-bottom:1px solid #c2a87e;line-height:1.5}.ending h2{letter-spacing:.15em}.ending button{display:inline-block;margin:10px}.ending{background:linear-gradient(#271d26dd,#100d15),url('/assets/backgrounds/lyceum.png') center/cover}
-@media(max-aspect-ratio:1/1){.dialogue{height:30%}.philosopher{right:10%;height:45%}.player{height:28%}}
-@media(prefers-reduced-motion:reduce){.philosopher{animation:none}}
-.dialogue .continue{align-self:flex-end;width:auto;margin:.5% 0 0;padding:.55em 1.4em;border:1px solid #b17e36;background:#8c2d47;color:#fff1d2;cursor:pointer}.phase-victory:after{content:'';position:absolute;inset:0;background:#d7a94722;pointer-events:none}.victory h2{color:#8b2940;font-family:'Libre Baskerville'}.transition h2{font:700 clamp(28px,5vw,64px) 'Libre Baskerville';color:#8b2940}
-/* Widescreen encounter treatment: use the supplied scene as a full-bleed focal image. */
-.game{background-size:cover;background-position:center 42%;}
-.game:after{content:'';position:absolute;inset:-3%;z-index:0;background:inherit;background-size:cover;background-position:center 42%;filter:blur(22px) brightness(.58);transform:scale(1.06);opacity:.72;pointer-events:none}
-.game:before{z-index:1;background:linear-gradient(90deg,#0b0a1398 0%,transparent 30%,transparent 72%,#0b0a1370 100%),linear-gradient(180deg,#09081240 0%,transparent 46%,#0b0912b0 100%)}
-.game>*{z-index:2}.hud{height:9%;padding-inline:3.5%;background:linear-gradient(180deg,#11101bd9,#11101b9c);backdrop-filter:blur(3px)}
-.hud nav{gap:clamp(14px,2.2vw,34px);padding-inline:2%;}.hud nav span{letter-spacing:.04em;text-shadow:0 2px 2px #000}.hud button{border-radius:2px;font-size:clamp(9px,1vw,13px);letter-spacing:.08em}
-.philosopher{right:20%;bottom:27%;height:52%;max-width:35%;filter:drop-shadow(0 18px 8px #08070acc) drop-shadow(0 0 9px #f1c77a33)}
-.player{left:8%;bottom:20%;height:34%;max-width:25%;filter:drop-shadow(0 18px 9px #030208) drop-shadow(0 0 5px #b5c9d455)}
-.nameplate{top:15%;right:12%;padding:1% 1.8%;background:#171225e8;box-shadow:5px 5px 0 #09070c88}
-.dialogue{left:5%;right:5%;bottom:3.5%;height:26%;padding:1.15%;background:linear-gradient(135deg,#f5e5c1,#e7cf9e);box-shadow:0 0 0 2px #d6ad62,0 10px 0 #07060baa}
-.dialogue p{max-width:92%;font-size:clamp(12px,1.18vw,17px);line-height:1.5}.dialogue form{height:35%}
-.game .hud{display:none}.game .stage{height:100%}
-.dialogue{height:42%;bottom:3.5%}.dialogue>div{flex:1;min-height:0;max-height:none;overflow-y:auto;padding:0 1.2%}.dialogue form{flex:0 0 23%;height:auto;min-height:46px}.philosopher{bottom:39%;height:45%}.player{bottom:30%;height:30%}
-@media(max-aspect-ratio:1/1){.dialogue{height:38%;bottom:2%}.dialogue form{flex-basis:27%}.philosopher{bottom:43%;height:39%}.player{bottom:34%;height:25%}}
-.player{bottom:42%;height:30%;max-width:23%}
-@media(max-aspect-ratio:1/1){.player{bottom:44%;height:25%;max-width:25%}}
-.title-card .how-to-play-button{background:transparent;border-color:#9d7950}.how-to-play-overlay{position:fixed;z-index:20;inset:0;display:grid;place-items:center;padding:clamp(16px,4vw,48px);background:#08070dcc}.how-to-play-panel{width:min(780px,94vw);max-height:min(82vh,760px);overflow:auto;padding:clamp(22px,4vw,44px);color:#32231f;text-align:left;background:linear-gradient(135deg,#f4e2ba,#e7c98f);border:clamp(3px,.45vw,6px) solid #1b1620;outline:2px solid #d3a75c;box-shadow:0 0 0 8px #201a25aa,0 18px 55px #000b}.how-to-play-panel h2{margin:0 0 1.2em;color:#7c2940;text-align:center;font:700 clamp(24px,4vw,42px) 'Libre Baskerville',serif;letter-spacing:.08em}.how-to-play-panel p{margin:0 0 1em;font:clamp(13px,1.35vw,18px)/1.55 'Libre Baskerville',Georgia,serif}.how-to-play-panel p.emphasis{color:#7c2940;font-weight:700;font-size:clamp(16px,1.7vw,22px)}.how-to-play-panel button{display:block;width:min(220px,100%);margin:1.3em auto 0;padding:11px;border:1px solid #d1a155;background:#7c2940;color:#fff0d4;cursor:pointer}@media(max-width:600px){.title-card{padding:28px 22px}.how-to-play-panel{max-height:88vh;padding:22px 20px}.how-to-play-panel p{font-size:13px}}
-.dialogue .transcript article{margin:0 0 .8em;padding:0 0 .65em;border-bottom:1px solid #b99a68aa}.dialogue .transcript article:last-of-type{margin-bottom:0}.dialogue .transcript article.user b{color:#66557f}.dialogue .transcript article p{margin:.25em 0 0}.dialogue .placeholder{color:#705d4b;font-style:italic}
-.dialogue .transcript{overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#8b2940 #d8c49e}.dialogue .transcript::-webkit-scrollbar{width:10px}.dialogue .transcript::-webkit-scrollbar-track{background:#d8c49e}.dialogue .transcript::-webkit-scrollbar-thumb{background:#8b2940;border:2px solid #d8c49e}
-.scene-machiavelli .philosopher{right:24%;bottom:34%;height:40%;max-width:32%}.scene-machiavelli .nameplate{right:7%;top:11%}
-.how-to-play-panel,.how-to-play-panel p{color:#35251f;opacity:1}
-.music-control{position:absolute;z-index:5;top:2.5%;right:3%;display:flex;align-items:center;gap:.55rem;padding:.35rem .55rem;background:#171225d9;border:1px solid #c5995d;color:#f7d799;font-size:clamp(9px,.8vw,12px);box-shadow:2px 2px 0 #09070c88}.music-toggle{padding:.25rem .45rem;border:1px solid #d1a155;background:#722b42;color:#fff0d4;cursor:pointer;font-size:inherit;letter-spacing:.05em}.music-control input[type=range]{width:clamp(58px,7vw,100px);accent-color:#d1a155;cursor:pointer}.music-status{color:#e7c98f;font-size:.72em;letter-spacing:.04em;white-space:nowrap}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}@media(max-aspect-ratio:1/1){.music-control{top:1.5%;right:2%;padding:.3rem}.music-control input[type=range]{width:58px}.music-status{display:none}}
+@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap');
 
-/* Bright, welcoming adventure scenes and title screen. */
-:root{background:#f1d79b}
-.game{background-color:#efd181}
-.game:before{content:'';background:linear-gradient(90deg,#15243a55 0%,#15243a00 24%,#15243a00 76%,#15243a33 100%),linear-gradient(180deg,#47392226 0%,transparent 24%,transparent 72%,#47392240 100%)}
-.game:after{content:none;background:none;filter:none}
-.title-screen{background-color:#f1d79b;background-image:linear-gradient(180deg,#503b2530 0%,transparent 25%,transparent 72%,#67452540 100%),url('/assets/backgrounds/athens.png');background-position:center;background-size:cover}
-.title-card{color:#46352d;background:#fff1d9f2;border-color:#b8793d;box-shadow:0 0 0 8px #fff0c988,0 25px 80px #62441f55}
-.title-card small{color:#9b5a30}
-.title-card h1{color:#46352d}
-.title-card h1 em{color:#ad523a}
-.title-card p{color:#674c3a}
-.title-card button{border-color:#bd8140;background:#ad523a;color:#fff4df}
-.title-card .how-to-play-button{color:#674c3a;background:#fff7e566;border-color:#ad7540}
+:root {
+  --navy: #17243a;
+  --navy-deep: #101a2c;
+  --navy-soft: #273a55;
+  --parchment: #f5e4b9;
+  --parchment-light: #fff3d2;
+  --parchment-shadow: #d6bd83;
+  --burgundy: #7d3045;
+  --burgundy-dark: #592336;
+  --gold: #c9964c;
+  --gold-light: #f0c875;
+  --ink: #1b2331;
+  font-family: 'Pixelify Sans', 'Trebuchet MS', sans-serif;
+  color: var(--parchment-light);
+  background: var(--navy-deep);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* { box-sizing: border-box; }
+html, body, #root { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+body { min-width: 320px; }
+button, textarea, input { font: inherit; }
+button { -webkit-tap-highlight-color: transparent; }
+
+.title-screen,
+.ending {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  background:
+    linear-gradient(180deg, #17243a2e 0%, #17243a12 48%, #17243a66 100%),
+    url('/assets/backgrounds/athens.png') center / cover;
+}
+
+.title-card {
+  width: min(580px, 88vw);
+  padding: clamp(26px, 5vw, 58px);
+  color: var(--navy);
+  background: #fff1d9f2;
+  border: 4px solid var(--navy);
+  box-shadow: 0 0 0 3px var(--gold), 8px 8px 0 #17243a66;
+}
+
+.title-card small,
+.ending small {
+  color: var(--burgundy);
+  font-size: clamp(11px, 1.3vw, 16px);
+  font-weight: 700;
+  letter-spacing: .15em;
+}
+
+.title-card h1,
+.ending h1 {
+  margin: 26px 0 20px;
+  color: var(--navy);
+  font-size: clamp(48px, 8vw, 104px);
+  font-weight: 700;
+  line-height: .82;
+  letter-spacing: .06em;
+}
+
+.title-card h1 em { color: var(--burgundy); font-style: normal; }
+.title-card p,
+.ending p { color: #594535; font-size: clamp(15px, 1.6vw, 19px); line-height: 1.55; }
+
+.title-card button,
+.ending button {
+  display: block;
+  width: min(260px, 100%);
+  margin: 14px auto;
+  padding: 12px 16px;
+  color: var(--parchment-light);
+  background: var(--burgundy);
+  border: 3px solid var(--navy);
+  box-shadow: 3px 3px 0 var(--gold);
+  cursor: pointer;
+  font-weight: 700;
+  letter-spacing: .06em;
+}
+
+.title-card button:hover,
+.ending button:hover,
+.dialogue button:hover,
+.music-toggle:hover { background: var(--burgundy-dark); }
+.title-card button:active,
+.ending button:active,
+.dialogue button:active,
+.music-toggle:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--gold); }
+.title-card button:disabled { cursor: wait; opacity: .45; }
+.title-card .how-to-play-button { color: var(--navy); background: #fff7d966; border-color: var(--gold); }
+
+.game {
+  position: relative;
+  width: min(100vw, 177.7778vh);
+  height: min(100dvh, 56.25vw);
+  margin: auto;
+  overflow: hidden;
+  color: var(--parchment-light);
+  background-color: #d7b36d;
+  background-repeat: no-repeat;
+  background-position: center 42%;
+  background-size: cover;
+}
+
+.game::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, #17243a12 0%, transparent 43%, #17243a0a 67%, #17243a70 100%),
+    linear-gradient(90deg, #17243a22 0%, transparent 25%, transparent 75%, #17243a18 100%);
+}
+
+.game > * { position: relative; z-index: 1; }
+.game main { position: absolute; inset: 0; }
+
+.nameplate {
+  position: absolute;
+  z-index: 4;
+  top: 10%;
+  right: 5%;
+  min-width: 150px;
+  padding: 8px 14px 7px;
+  color: var(--parchment-light);
+  background: #17243aeb;
+  border: 3px solid var(--gold);
+  box-shadow: 4px 4px 0 #101a2ccc;
+  font-size: clamp(17px, 2vw, 29px);
+  font-weight: 700;
+  line-height: 1;
+  text-align: left;
+}
+
+.nameplate small {
+  display: block;
+  margin-top: 6px;
+  color: var(--gold-light);
+  font-size: clamp(10px, .85vw, 13px);
+  font-weight: 500;
+  letter-spacing: .08em;
+}
+
+.philosopher,
+.player {
+  position: absolute;
+  z-index: 2;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.philosopher {
+  right: 14%;
+  bottom: 20%;
+  height: 51%;
+  max-width: 38%;
+  filter: drop-shadow(3px 4px 0 #17243acc) drop-shadow(0 0 2px #fff0c966);
+  animation: idle 3s ease-in-out infinite;
+}
+
+.philosopher.thinking { animation: think .7s ease-in-out infinite; }
+.player {
+  left: 7%;
+  bottom: 30%;
+  height: 32%;
+  max-width: 26%;
+  filter: drop-shadow(3px 4px 0 #17243acc) drop-shadow(0 0 2px #e5c77d55);
+}
+
+@keyframes idle { 50% { transform: translateY(-.7%); } }
+@keyframes think { 50% { transform: translateX(.6%); } }
+
+.dialogue {
+  position: absolute;
+  z-index: 5;
+  left: 5%;
+  right: 5%;
+  bottom: 1%;
+  height: 28%;
+  min-height: 184px;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(9px, 1vw, 15px);
+  color: var(--ink);
+  background: linear-gradient(135deg, var(--parchment-light), var(--parchment));
+  border: 4px solid var(--navy);
+  box-shadow: 0 0 0 2px var(--gold), 5px 5px 0 #101a2caa;
+}
+
+.dialogue > div {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 1.2%;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--burgundy) var(--parchment-shadow);
+}
+
+.dialogue > div::-webkit-scrollbar { width: 10px; }
+.dialogue > div::-webkit-scrollbar-track { background: var(--parchment-shadow); }
+.dialogue > div::-webkit-scrollbar-thumb { background: var(--burgundy); border: 2px solid var(--parchment-shadow); }
+.dialogue article { margin: 0 0 8px; padding: 0 0 7px; border-bottom: 2px solid #b99a6866; }
+.dialogue article:last-of-type { margin-bottom: 0; }
+.dialogue b { color: var(--burgundy); font-size: clamp(12px, 1vw, 16px); font-weight: 700; letter-spacing: .08em; }
+.dialogue article.user b { color: #40577b; }
+.dialogue p { max-width: 96%; margin: 4px 0 0; color: var(--ink); font-size: clamp(15px, 1.3vw, 20px); font-weight: 500; line-height: 1.35; white-space: pre-wrap; }
+.dialogue .placeholder { color: #705d4b; font-style: italic; }
+.dialogue .placeholder p { color: #705d4b; }
+
+.dialogue form { display: flex; flex: 0 0 auto; gap: 8px; min-height: 45px; margin-top: 8px; }
+.dialogue textarea {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 45px;
+  resize: none;
+  padding: 8px 10px;
+  color: var(--ink);
+  background: #fff9e5;
+  border: 3px solid var(--navy-soft);
+  outline: none;
+  font-size: clamp(14px, 1.05vw, 17px);
+  line-height: 1.25;
+}
+
+.dialogue textarea:focus { border-color: var(--burgundy); box-shadow: 0 0 0 2px var(--gold); }
+.dialogue textarea::placeholder { color: #75654e; opacity: 1; }
+.dialogue form button,
+.dialogue .continue,
+.modal button {
+  color: var(--parchment-light);
+  background: var(--burgundy);
+  border: 3px solid var(--navy);
+  box-shadow: 3px 3px 0 var(--gold);
+  cursor: pointer;
+  font-size: clamp(13px, 1vw, 16px);
+  font-weight: 700;
+  letter-spacing: .05em;
+}
+
+.dialogue form button { flex: 0 0 auto; min-width: 102px; padding: 0 14px; }
+.dialogue form button:disabled { cursor: wait; opacity: .4; }
+.dialogue .continue { align-self: flex-end; margin-top: 7px; padding: 7px 18px; }
+
+.music-control {
+  position: absolute;
+  z-index: 6;
+  top: 2.5%;
+  right: 3%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  color: var(--parchment-light);
+  background: #17243ae8;
+  border: 3px solid var(--gold);
+  box-shadow: 3px 3px 0 #101a2caa;
+  font-size: clamp(11px, .85vw, 14px);
+}
+
+.music-toggle { padding: 4px 8px; color: var(--parchment-light); background: var(--burgundy); border: 2px solid var(--navy); cursor: pointer; font-size: inherit; font-weight: 700; letter-spacing: .04em; }
+.music-control input[type='range'] { width: clamp(58px, 7vw, 100px); height: 18px; margin: 0; appearance: none; background: transparent; cursor: pointer; }
+.music-control input[type='range']::-webkit-slider-runnable-track { height: 6px; background: var(--parchment-shadow); border: 2px solid var(--navy); }
+.music-control input[type='range']::-webkit-slider-thumb { width: 14px; height: 14px; margin-top: -6px; appearance: none; background: var(--gold-light); border: 2px solid var(--navy); }
+.music-control input[type='range']::-moz-range-track { height: 6px; background: var(--parchment-shadow); border: 2px solid var(--navy); }
+.music-control input[type='range']::-moz-range-thumb { width: 11px; height: 11px; background: var(--gold-light); border: 2px solid var(--navy); border-radius: 0; }
+.music-status { color: var(--gold-light); font-size: .82em; white-space: nowrap; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+.error { position: absolute; z-index: 8; left: 5%; bottom: 32%; max-width: 90%; padding: 8px 11px; color: var(--parchment-light); background: var(--burgundy-dark); border: 3px solid var(--gold); }
+.modal { position: absolute; z-index: 10; inset: 0; display: grid; place-items: center; background: #101a2c99; }
+.modal > div { width: min(650px, 85%); max-height: 80%; overflow: auto; padding: clamp(18px, 3vw, 35px); color: var(--ink); text-align: center; background: var(--parchment); border: 4px solid var(--navy); box-shadow: 0 0 0 2px var(--gold), 7px 7px 0 #101a2c99; }
+.modal h2 { color: var(--burgundy); font-size: clamp(24px, 4vw, 48px); line-height: 1; }
+.modal p { font-size: clamp(15px, 1.5vw, 20px); }
+.modal button { padding: 10px 20px; }
+.transition h2 { color: var(--burgundy); font-size: clamp(30px, 5vw, 64px); }
+.phase-victory::after { content: ''; position: absolute; inset: 0; z-index: 0; background: #f0c8751c; pointer-events: none; }
+
+.how-to-play-overlay { position: fixed; z-index: 20; inset: 0; display: grid; place-items: center; padding: clamp(16px, 4vw, 48px); background: #101a2ccc; }
+.how-to-play-panel { width: min(780px, 94vw); max-height: min(82vh, 760px); overflow: auto; padding: clamp(22px, 4vw, 44px); color: var(--ink); text-align: left; background: linear-gradient(135deg, var(--parchment-light), var(--parchment)); border: 4px solid var(--navy); box-shadow: 0 0 0 2px var(--gold), 8px 8px 0 #101a2c99; }
+.how-to-play-panel h2 { margin: 0 0 1.2em; color: var(--burgundy); text-align: center; font-size: clamp(25px, 4vw, 43px); line-height: 1; letter-spacing: .08em; }
+.how-to-play-panel p { margin: 0 0 1em; font-size: clamp(14px, 1.35vw, 18px); line-height: 1.5; }
+.how-to-play-panel p.emphasis { color: var(--burgundy); font-size: clamp(16px, 1.7vw, 22px); font-weight: 700; }
+.how-to-play-panel button { display: block; width: min(220px, 100%); margin: 1.3em auto 0; padding: 11px; color: var(--parchment-light); background: var(--burgundy); border: 3px solid var(--navy); box-shadow: 3px 3px 0 var(--gold); cursor: pointer; }
+
+@media (max-aspect-ratio: 1/1) {
+  .game { width: 100vw; height: 100dvh; background-position: center 34%; }
+  .music-control { top: 2%; right: 3%; padding: 5px; }
+  .music-control input[type='range'] { width: 58px; }
+  .music-status { display: none; }
+  .nameplate { top: 10%; right: 4%; min-width: 126px; padding: 7px 10px; font-size: 18px; }
+  .nameplate small { margin-top: 4px; font-size: 9px; }
+  .philosopher { right: 5%; bottom: 34%; height: 38%; max-width: 52%; }
+  .player { left: 5%; bottom: 39%; height: 25%; max-width: 32%; }
+  .dialogue { left: 3%; right: 3%; bottom: .75%; height: 39%; min-height: 205px; padding: 9px; }
+  .dialogue p { max-width: 100%; font-size: 15px; line-height: 1.3; }
+  .dialogue form { gap: 6px; }
+  .dialogue form button { min-width: 82px; padding: 0 9px; }
+  .error { left: 3%; bottom: 43%; }
+}
+
+@media (max-height: 640px) and (orientation: landscape) {
+  .dialogue { height: 31%; min-height: 155px; }
+  .dialogue p { font-size: 14px; }
+  .philosopher { bottom: 22%; height: 48%; }
+  .player { bottom: 30%; height: 29%; }
+}
+
+@media (max-width: 600px) {
+  .title-card { padding: 28px 22px; }
+  .how-to-play-panel { max-height: 88vh; padding: 22px 20px; }
+  .how-to-play-panel p { font-size: 13px; }
+}
+
+@media (prefers-reduced-motion: reduce) { .philosopher { animation: none; } }
