@@ -21,6 +21,9 @@ class GameState(BaseModel):
     budget_output_tokens: int = 0
     conviction: dict[str, int] = Field(default_factory=lambda: {name: 100 for name in PHILOSOPHERS})
     progress_fingerprints: list[str] = Field(default_factory=list)
+    last_momentum: str = "inconclusive"
+    last_momentum_change: int = 0
+    last_momentum_feedback: str = ""
 
     @property
     def philosopher(self) -> str:
