@@ -14,6 +14,7 @@ class GameState(BaseModel):
     session_id: str
     philosopher_index: int = 0
     persuaded: list[str] = Field(default_factory=list)
+    surrendered: list[str] = Field(default_factory=list)
     messages: list[dict[str, str]] = Field(default_factory=list)
     budget_requests: int = 0
     budget_output_tokens: int = 0
@@ -24,7 +25,7 @@ class GameState(BaseModel):
 
     @property
     def complete(self) -> bool:
-        return len(self.persuaded) == len(PHILOSOPHERS)
+        return len(set(self.persuaded) | set(self.surrendered)) == len(PHILOSOPHERS)
 
 
 def now_iso() -> str:

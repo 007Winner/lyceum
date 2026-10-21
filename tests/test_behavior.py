@@ -12,6 +12,40 @@ from tools import PHILOSOPHERS
 
 
 class ConversationBehaviorTests(unittest.TestCase):
+    def test_explicit_surrender_advances_without_evaluator_for_each_philosopher(self) -> None:
+        client = TestClient(api.app)
+        for index, philosopher in enumerate(PHILOSOPHERS):
+            session_id = f"surrender-{philosopher}"
+            state = agents.GameState(session_id=session_id, philosopher_index=index)
+            api.SESSIONS[session_id] = state
+            try:
+                with patch.object(api, "philosopher_turn", new=AsyncMock(return_value=("You have yielded.", 1))) as turn, \
+                     patch.object(api, "evaluate", new=AsyncMock(side_effect=AssertionError("evaluator called"))):
+                    response = client.post(f"/api/sessions/{session_id}/messages", json={"message": "I surrender this debate."})
+                self.assertEqual(response.status_code, 200)
+                payload = response.json()
+                self.assertEqual(payload["outcome"], "surrender")
+                self.assertTrue(payload["advanced"])
+                self.assertEqual(payload["state"]["persuaded"], [])
+                self.assertEqual(payload["state"]["surrendered"], [philosopher])
+                turn.assert_awaited_once()
+                self.assertTrue(turn.await_args.kwargs["surrender"])
+            finally:
+                api.SESSIONS.pop(session_id, None)
+
+    def test_hypothetical_surrender_is_ordinary_argument(self) -> None:
+        session_id = "hypothetical-surrender"
+        state = agents.GameState(session_id=session_id)
+        api.SESSIONS[session_id] = state
+        try:
+            with patch.object(api, "philosopher_turn", new=AsyncMock(return_value=("Consider it carefully.", 1))), \
+                 patch.object(api, "evaluate", new=AsyncMock(return_value={"persuaded": False, "reason": "", "belief": None})) as evaluator:
+                response = TestClient(api.app).post(f"/api/sessions/{session_id}/messages", json={"message": "Suppose I surrender: what would follow?"})
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json()["outcome"], "none")
+            evaluator.assert_awaited_once()
+        finally:
+            api.SESSIONS.pop(session_id, None)
     def test_casual_turns_do_not_trigger_retrieval_or_progress_language(self) -> None:
         messages = ["hello. how's it going?", "what's up?", "lol", "what have you been doing today?"]
         for message in messages:

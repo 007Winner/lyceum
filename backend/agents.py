@@ -223,6 +223,8 @@ async def philosopher_turn(
     state: GameState,
     player_message: str,
     budget: Budget,
+    *,
+    surrender: bool = False,
 ) -> tuple[str, int]:
     references = ""
     needs_grounding = should_retrieve(player_message)
@@ -238,6 +240,10 @@ async def philosopher_turn(
             )
             references = ""
     system = section("Shared rules") + "\n\n" + section(state.philosopher)
+    if surrender:
+        system += ("\n\nThe player has explicitly surrendered this debate. Acknowledge the surrender "
+                   "briefly in your established voice (one or two sentences). Do not continue "
+                   "the argument, claim persuasion, or ask a question.")
     exemplars = STYLE_EXEMPLARS.get(state.philosopher, [])
     if exemplars:
         rendered = "\n\n".join(f"[{item['work']} ? {item['edition']}]\n{item['passage']}" for item in exemplars)
