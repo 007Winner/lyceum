@@ -39,6 +39,7 @@ class AudioManager {
   private available = false;
   private disposed = false;
   private generation = 0;
+  private fadeProgress = 0;
   private volume = readVolume();
   private status: PlaybackStatus = { playing: false, blocked: false, missing: null };
 
@@ -95,6 +96,7 @@ class AudioManager {
 
     if (trackChanged) {
       this.generation += 1;
+      this.fadeProgress = 0;
       this.audio.pause();
       this.track = track;
       this.publish({ playing: false, blocked: false, missing: null });
@@ -110,22 +112,25 @@ class AudioManager {
     if (!this.available) {
       if (fadeOut && !this.audio.paused) {
         // The victory screen retains its existing short fade; user-requested OFF is always immediate.
-        const startVolume = this.audio.volume;
         const started = performance.now();
         const generation = ++this.generation;
+        this.fadeProgress = 0;
         const fade = (now: number) => {
           if (generation !== this.generation) return;
           const progress = Math.min(1, (now - started) / 2000);
-          this.audio.volume = startVolume * (1 - progress);
+          this.fadeProgress = progress;
+          this.audio.volume = this.volume * (1 - progress);
           if (progress < 1) requestAnimationFrame(fade);
           else {
             this.audio.pause();
+            this.fadeProgress = 0;
             this.audio.volume = this.volume;
           }
         };
         requestAnimationFrame(fade);
       } else {
         this.generation += 1;
+        this.fadeProgress = 0;
         this.audio.pause();
         this.audio.volume = this.volume;
         this.publish({ playing: false });
@@ -133,6 +138,7 @@ class AudioManager {
       return;
     }
 
+    this.fadeProgress = 0;
     this.audio.volume = this.volume;
     if (this.requested && (trackChanged || becameAvailable)) this.attemptPlay();
   }
@@ -146,6 +152,7 @@ class AudioManager {
     localStorage.setItem(MUTED_KEY, String(!requested));
     if (!requested) {
       this.generation += 1;
+      this.fadeProgress = 0;
       this.audio.pause();
       this.audio.volume = this.volume;
       this.publish({ playing: false, blocked: false });
@@ -161,13 +168,14 @@ class AudioManager {
   setVolume(volume: number) {
     this.volume = Math.max(0, Math.min(1, volume));
     localStorage.setItem(VOLUME_KEY, String(this.volume));
-    this.audio.volume = this.volume;
+    this.audio.volume = this.volume * (1 - this.fadeProgress);
   }
 
   dispose() {
     this.disposed = true;
     this.available = false;
     this.generation += 1;
+    this.fadeProgress = 0;
     this.audio.pause();
     this.audio.removeAttribute("src");
     this.audio.load();
