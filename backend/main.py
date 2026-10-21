@@ -111,7 +111,7 @@ async def send_message(session_id: str, request: ChatRequest) -> dict:
     state.conviction.setdefault(philosopher, 100)
     # Exact repeated submissions cannot farm conviction loss. The evaluator
     # remains the sole authority for both progress classification and victory.
-    fingerprint = hashlib.sha256(re.sub(r"\s+", " ", message.strip().lower()).encode("utf-8")).hexdigest()
+    fingerprint = hashlib.sha256(f"{philosopher}: {re.sub(r"\s+", " ", message.strip().lower())}".encode("utf-8")).hexdigest()
     progress_level = str(result.get("progress_level", "none"))
     if progress_level in {"minor", "substantial"} and fingerprint not in state.progress_fingerprints:
         state.progress_fingerprints.append(fingerprint)
