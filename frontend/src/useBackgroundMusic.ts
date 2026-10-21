@@ -3,8 +3,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 export type MusicPhilosopher = "plato" | "aristotle" | "machiavelli" | "hume" | "kant";
 
 export const MUSIC_TRACKS: Record<MusicPhilosopher, string> = {
-  // Bump Plato's asset URL so browsers and Vercel's edge cache do not reuse
-  // the previously cached copy that failed to start on the title-screen click.
   plato: "/audio/plato.mp3?v=2",
   aristotle: "/audio/aristotle.mp3",
   machiavelli: "/audio/machiavelli.mp3",
@@ -13,151 +11,167 @@ export const MUSIC_TRACKS: Record<MusicPhilosopher, string> = {
 };
 
 const DEFAULT_VOLUME = 0.22;
-// Versioned keys reset preferences saved by the earlier unreliable player so
-// the hosted site starts audible instead of inheriting a stuck mute/zero volume.
 const VOLUME_KEY = "lyceum-music-volume-v2";
 const MUTED_KEY = "lyceum-music-muted-v2";
 
-type ActiveTrack = { philosopher: MusicPhilosopher; audio: HTMLAudioElement };
+type PlaybackStatus = {
+  playing: boolean;
+  blocked: boolean;
+  missing: MusicPhilosopher | null;
+};
 
 function readVolume() {
-  const stored = Number(localStorage.getItem(VOLUME_KEY));
-  return Number.isFinite(stored) && stored >= 0 && stored <= 1 ? stored : DEFAULT_VOLUME;
+  const saved = localStorage.getItem(VOLUME_KEY);
+  if (saved === null) return DEFAULT_VOLUME;
+  const volume = Number(saved);
+  return Number.isFinite(volume) && volume >= 0 && volume <= 1 ? volume : DEFAULT_VOLUME;
 }
 
-function readMuted() {
-  const stored = localStorage.getItem(MUTED_KEY);
-  // New players start muted; an explicit preference survives refreshes.
-  return stored === null ? true : stored === "true";
+function readRequested() {
+  return localStorage.getItem(MUTED_KEY) === "false";
 }
 
+/** Owns the only audio element used by the app and keeps requested and actual playback separate. */
 class AudioManager {
-  private active: ActiveTrack | null = null;
-  private audios = new Set<HTMLAudioElement>();
-  private frame: number | null = null;
-  private volume: number;
-  private muted: boolean;
-  private onMissing: (philosopher: MusicPhilosopher) => void;
-  private onBlocked: () => void;
+  private readonly audio = new Audio();
+  private track: MusicPhilosopher | null = null;
+  private requested = false;
+  private available = false;
+  private disposed = false;
+  private generation = 0;
+  private volume = readVolume();
+  private status: PlaybackStatus = { playing: false, blocked: false, missing: null };
 
-  constructor(onMissing: (philosopher: MusicPhilosopher) => void, onBlocked: () => void) {
-    this.volume = readVolume();
-    this.muted = readMuted();
-    this.onMissing = onMissing;
-    this.onBlocked = onBlocked;
+  constructor(private readonly onStatus: (status: PlaybackStatus) => void, requested: boolean) {
+    this.requested = requested;
+    this.audio.loop = true;
+    this.audio.preload = "auto";
+    this.audio.volume = this.volume;
+    this.audio.addEventListener("playing", this.onPlaying);
+    this.audio.addEventListener("pause", this.onPause);
+    this.audio.addEventListener("waiting", this.onWaiting);
+    this.audio.addEventListener("error", this.onError);
   }
 
-  private level() {
-    return this.muted ? 0 : this.volume;
+  private publish(next: Partial<PlaybackStatus>) {
+    this.status = { ...this.status, ...next };
+    this.onStatus(this.status);
   }
 
-  private cancelFade() {
-    if (this.frame !== null) {
-      cancelAnimationFrame(this.frame);
-      this.frame = null;
+  private onPlaying = () => {
+    if (this.requested && this.available && !this.disposed) {
+      this.publish({ playing: true, blocked: false, missing: null });
+    } else {
+      this.audio.pause();
+    }
+  };
+
+  private onPause = () => this.publish({ playing: false });
+  private onWaiting = () => this.publish({ playing: false });
+  private onError = () => {
+    if (this.track) this.publish({ playing: false, missing: this.track });
+  };
+
+  private attemptPlay() {
+    if (!this.requested || !this.available || !this.track || this.disposed) return;
+    const attemptGeneration = ++this.generation;
+    this.publish({ blocked: false, missing: null });
+    try {
+      void this.audio.play().catch(() => {
+        if (attemptGeneration === this.generation && this.requested && this.available) {
+          this.publish({ playing: false, blocked: true });
+        }
+      });
+    } catch {
+      if (attemptGeneration === this.generation) this.publish({ playing: false, blocked: true });
     }
   }
 
-  private safelyPlay(audio: HTMLAudioElement) {
-    // Do not call load() immediately before play(): on a fresh page load that
-    // resets resource selection inside the user gesture and can make the
-    // subsequent play promise reject. The browser will select the preloaded
-    // source itself, and the rejection path below handles autoplay policy.
-    const attempt = audio.play();
-    attempt.catch(() => this.onBlocked());
-  }
+  configure(track: MusicPhilosopher | null, available: boolean, fadeOut: boolean) {
+    this.disposed = false;
+    const trackChanged = track !== this.track;
+    const becameAvailable = available && track !== null && !this.available;
+    this.available = available && track !== null;
 
-  private silenceStale(keep: HTMLAudioElement | null) {
-    for (const audio of this.audios) {
-      if (audio === keep) continue;
-      audio.pause();
-      audio.currentTime = 0;
-      audio.volume = 0;
-      this.audios.delete(audio);
+    if (trackChanged) {
+      this.generation += 1;
+      this.audio.pause();
+      this.track = track;
+      this.publish({ playing: false, blocked: false, missing: null });
+      if (track) {
+        this.audio.src = MUSIC_TRACKS[track];
+        this.audio.load();
+      } else {
+        this.audio.removeAttribute("src");
+        this.audio.load();
+      }
     }
-  }
 
-  play(philosopher: MusicPhilosopher, duration = 1500) {
-    if (this.active?.philosopher === philosopher) {
-      if (this.active.audio.paused) this.safelyPlay(this.active.audio);
+    if (!this.available) {
+      if (fadeOut && !this.audio.paused) {
+        // The victory screen retains its existing short fade; user-requested OFF is always immediate.
+        const startVolume = this.audio.volume;
+        const started = performance.now();
+        const generation = ++this.generation;
+        const fade = (now: number) => {
+          if (generation !== this.generation) return;
+          const progress = Math.min(1, (now - started) / 2000);
+          this.audio.volume = startVolume * (1 - progress);
+          if (progress < 1) requestAnimationFrame(fade);
+          else {
+            this.audio.pause();
+            this.audio.volume = this.volume;
+          }
+        };
+        requestAnimationFrame(fade);
+      } else {
+        this.generation += 1;
+        this.audio.pause();
+        this.audio.volume = this.volume;
+        this.publish({ playing: false });
+      }
       return;
     }
 
-    this.cancelFade();
-    const old = this.active;
-    this.silenceStale(old?.audio ?? null);
-    const next = new Audio(MUSIC_TRACKS[philosopher]);
-    next.loop = true;
-    next.preload = "auto";
-    next.volume = 0;
-    next.addEventListener("error", () => this.onMissing(philosopher), { once: true });
-    this.audios.add(next);
-    this.active = { philosopher, audio: next };
-    this.safelyPlay(next);
-
-    const started = performance.now();
-    const oldVolume = old?.audio.volume ?? 0;
-    const fade = (now: number) => {
-      const progress = Math.min(1, (now - started) / duration);
-      next.volume = this.level() * progress;
-      if (old) old.audio.volume = oldVolume * (1 - progress);
-      if (progress < 1) {
-        this.frame = requestAnimationFrame(fade);
-      } else {
-        if (old) {
-          old.audio.pause();
-          old.audio.currentTime = 0;
-          this.audios.delete(old.audio);
-        }
-        this.frame = null;
-      }
-    };
-    this.frame = requestAnimationFrame(fade);
+    this.audio.volume = this.volume;
+    if (this.requested && (trackChanged || becameAvailable)) this.attemptPlay();
   }
 
-  stop(duration = 2000) {
-    if (!this.active) return;
-    this.cancelFade();
-    const track = this.active;
-    this.silenceStale(track.audio);
-    const started = performance.now();
-    const initial = track.audio.volume;
-    const fade = (now: number) => {
-      const progress = Math.min(1, (now - started) / duration);
-      track.audio.volume = initial * (1 - progress);
-      if (progress < 1) {
-        this.frame = requestAnimationFrame(fade);
-      } else {
-        track.audio.pause();
-        track.audio.currentTime = 0;
-        this.audios.delete(track.audio);
-        if (this.active === track) this.active = null;
-        this.frame = null;
-      }
-    };
-    this.frame = requestAnimationFrame(fade);
+  startNow(track: MusicPhilosopher) {
+    this.configure(track, true, false);
+  }
+
+  setRequested(requested: boolean) {
+    this.requested = requested;
+    localStorage.setItem(MUTED_KEY, String(!requested));
+    if (!requested) {
+      this.generation += 1;
+      this.audio.pause();
+      this.audio.volume = this.volume;
+      this.publish({ playing: false, blocked: false });
+    } else {
+      this.attemptPlay();
+    }
+  }
+
+  retry() {
+    if (this.requested && !this.status.playing) this.attemptPlay();
   }
 
   setVolume(volume: number) {
-    this.volume = volume;
-    localStorage.setItem(VOLUME_KEY, String(volume));
-    if (this.active && this.frame === null && !this.muted) this.active.audio.volume = volume;
-  }
-
-  setMuted(muted: boolean) {
-    this.muted = muted;
-    localStorage.setItem(MUTED_KEY, String(muted));
-    if (this.active && this.frame === null) this.active.audio.volume = this.level();
+    this.volume = Math.max(0, Math.min(1, volume));
+    localStorage.setItem(VOLUME_KEY, String(this.volume));
+    this.audio.volume = this.volume;
   }
 
   dispose() {
-    this.cancelFade();
-    for (const audio of this.audios) {
-      audio.pause();
-      audio.src = "";
-    }
-    this.audios.clear();
-    this.active = null;
+    this.disposed = true;
+    this.available = false;
+    this.generation += 1;
+    this.audio.pause();
+    this.audio.removeAttribute("src");
+    this.audio.load();
+    this.publish({ playing: false });
   }
 }
 
@@ -166,64 +180,54 @@ export function useBackgroundMusic(
   shouldPlay: boolean,
   fadeOut = false,
 ) {
-  const [volume, setVolumeState] = useState(() => readVolume());
-  const [muted, setMutedState] = useState(() => readMuted());
-  const [missing, setMissing] = useState<MusicPhilosopher | null>(null);
-  const [blocked, setBlocked] = useState(false);
+  const [volume, setVolumeState] = useState(readVolume);
+  const [requested, setRequestedState] = useState(readRequested);
+  const [playback, setPlayback] = useState<PlaybackStatus>({ playing: false, blocked: false, missing: null });
   const manager = useRef<AudioManager | null>(null);
 
-  // Initialize synchronously so a very fast START GAME click cannot beat the
-  // effect that would otherwise create the audio manager.
-  if (!manager.current) {
-    manager.current = new AudioManager((track) => setMissing(track), () => setBlocked(true));
-  }
+  if (!manager.current) manager.current = new AudioManager(setPlayback, requested);
 
   useEffect(() => {
-    return () => manager.current?.dispose();
-  }, []);
+    manager.current?.configure(philosopher, shouldPlay, fadeOut);
+  }, [fadeOut, philosopher, shouldPlay]);
 
-  // A deployment may be opened without a user gesture. If the browser blocks
-  // that first autoplay attempt, retry the current track on the first real
-  // interaction anywhere in the document (the game already exposes the same
-  // retry through its music control).
   useEffect(() => {
-    const retry = () => {
-      if (manager.current && philosopher && shouldPlay && !fadeOut) {
-        setBlocked(false);
-        manager.current.play(philosopher);
-      }
+    const retry = (event: Event) => {
+      if (event.target instanceof Element && event.target.closest(".music-toggle")) return;
+      manager.current?.retry();
     };
     window.addEventListener("pointerdown", retry, { passive: true });
-    window.addEventListener("keydown", retry, { passive: true });
+    window.addEventListener("keydown", retry);
     return () => {
       window.removeEventListener("pointerdown", retry);
       window.removeEventListener("keydown", retry);
+      manager.current?.dispose();
     };
-  }, [fadeOut, philosopher, shouldPlay]);
-
-  useEffect(() => {
-    if (fadeOut || !shouldPlay || !philosopher) manager.current?.stop();
-    else manager.current?.play(philosopher);
-  }, [fadeOut, philosopher, shouldPlay]);
-
-  const startNow = useCallback((track: MusicPhilosopher) => {
-    setBlocked(false);
-    manager.current?.play(track);
   }, []);
-  const resume = useCallback(() => {
-    if (philosopher) {
-      setBlocked(false);
-      manager.current?.play(philosopher);
-    }
-  }, [philosopher]);
+
+  const setRequested = useCallback((next: boolean) => {
+    setRequestedState(next);
+    manager.current?.setRequested(next);
+  }, []);
+
   const setVolume = useCallback((next: number) => {
-    setVolumeState(next);
-    manager.current?.setVolume(next);
-  }, []);
-  const setMuted = useCallback((next: boolean) => {
-    setMutedState(next);
-    manager.current?.setMuted(next);
+    const safeVolume = Math.max(0, Math.min(1, next));
+    setVolumeState(safeVolume);
+    manager.current?.setVolume(safeVolume);
   }, []);
 
-  return { volume, muted, missing, blocked, startNow, resume, setVolume, setMuted };
+  const resume = useCallback(() => manager.current?.retry(), []);
+  const startNow = useCallback((track: MusicPhilosopher) => manager.current?.startNow(track), []);
+
+  return {
+    volume,
+    requested,
+    playing: playback.playing,
+    blocked: playback.blocked,
+    missing: playback.missing,
+    startNow,
+    resume,
+    setVolume,
+    setRequested,
+  };
 }
