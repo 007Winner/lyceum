@@ -276,7 +276,7 @@ async def evaluate(state: GameState, player_message: str, reply: str, budget: Bu
     prompt = (
         f"Philosopher: {state.philosopher}\nConversation history:\n{transcript}\n\n"
         "Assess the player's latest argument and the philosopher's latest response in context. "
-        "Return JSON only with persuaded, reason, belief, progress_level, momentum, and momentum_points."
+        "Return JSON only with persuaded, reason, belief, and progress_level (none, minor, or substantial)."
     )
     try:
         raw, _ = await _complete(
@@ -293,8 +293,6 @@ async def evaluate(state: GameState, player_message: str, reply: str, budget: Bu
                 "reason": str(data.get("reason", "")),
                 "belief": data.get("belief"),
                 "progress_level": data.get("progress_level", "none") if data.get("progress_level", "none") in {"none", "minor", "substantial"} else "none",
-                "momentum": data.get("momentum", "inconclusive") if data.get("momentum", "inconclusive") in {"decisive_objection", "strong_objection", "minor_objection", "inconclusive", "weak_argument", "serious_error"} else "inconclusive",
-                "momentum_points": int(data.get("momentum_points", 0)) if str(data.get("momentum_points", 0)).lstrip("-").isdigit() else 0,
             }
     except Exception as exc:
         LOGGER.error(
@@ -308,8 +306,6 @@ async def evaluate(state: GameState, player_message: str, reply: str, budget: Bu
         "reason": "The independent evaluator was unavailable or returned invalid output; progression is denied.",
         "belief": None,
         "progress_level": "none",
-        "momentum": "inconclusive",
-        "momentum_points": 0,
     }
 
 

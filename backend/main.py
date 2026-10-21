@@ -112,33 +112,11 @@ async def send_message(session_id: str, request: ChatRequest) -> dict:
     # Exact repeated submissions cannot farm conviction loss. The evaluator
     # remains the sole authority for both progress classification and victory.
     fingerprint = hashlib.sha256(f"{philosopher}: {re.sub(r"\s+", " ", message.strip().lower())}".encode("utf-8")).hexdigest()
-    momentum = str(result.get("momentum", "inconclusive"))
-    ranges = {
-        "decisive_objection": (-75, -40), "strong_objection": (-35, -15),
-        "minor_objection": (-10, -5), "inconclusive": (0, 0),
-        "weak_argument": (5, 15), "serious_error": (15, 30),
-    }
-    low, high = ranges.get(momentum, (0, 0))
-    try:
-        requested_change = int(result.get("momentum_points", 0))
-    except (TypeError, ValueError):
-        requested_change = 0
-    change = max(low, min(high, requested_change))
-    state.last_momentum = momentum if momentum in ranges else "inconclusive"
-    state.last_momentum_change = 0
-    feedback = {
-        "decisive_objection": "A DEVASTATING OBJECTION!", "strong_objection": "DOUBT TAKES HOLD!",
-        "minor_objection": "A CRACK IN THE ARGUMENT!", "weak_argument": "CONVICTION RESTORED!",
-        "serious_error": f"{philosopher.upper()} HOLDS FIRM!", "inconclusive": "CONVICTION HOLDS.",
-    }
-    state.last_momentum_feedback = feedback.get(state.last_momentum, "CONVICTION HOLDS.")
-    if fingerprint not in state.progress_fingerprints:
+    progress_level = str(result.get("progress_level", "none"))
+    if progress_level in {"minor", "substantial"} and fingerprint not in state.progress_fingerprints:
         state.progress_fingerprints.append(fingerprint)
-        state.last_momentum_change = change
-        state.conviction[philosopher] = max(1, min(100, state.conviction[philosopher] + change))
-    else:
-        state.last_momentum_change = 0
-        state.last_momentum_feedback = "ARGUMENT ALREADY CONSIDERED."
+        deduction = 8 if progress_level == "minor" else 20
+        state.conviction[philosopher] = max(10, state.conviction[philosopher] - deduction)
     if result.get("persuaded") and philosopher not in state.persuaded:
         belief = str(result.get("belief") or "a stated commitment")[:200]
         state.persuaded.append(philosopher)
