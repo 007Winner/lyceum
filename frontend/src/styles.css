@@ -7,10 +7,9 @@
 @media(max-aspect-ratio:1/1){.dialogue{height:30%}.philosopher{right:10%;height:45%}.player{height:28%}}
 @media(prefers-reduced-motion:reduce){.philosopher{animation:none}}
 .dialogue .continue{align-self:flex-end;width:auto;margin:.5% 0 0;padding:.55em 1.4em;border:1px solid #b17e36;background:#8c2d47;color:#fff1d2;cursor:pointer}.phase-victory:after{content:'';position:absolute;inset:0;background:#d7a94722;pointer-events:none}.victory h2{color:#8b2940;font-family:'Libre Baskerville'}.transition h2{font:700 clamp(28px,5vw,64px) 'Libre Baskerville';color:#8b2940}
-/* Widescreen encounter treatment: use the supplied scene as a full-bleed focal image. */
-.game{background-size:cover;background-position:center 42%;}
-.game:after{content:'';position:absolute;inset:-3%;z-index:0;background:inherit;background-size:cover;background-position:center 42%;filter:blur(22px) brightness(.42);transform:scale(1.06);opacity:.72;pointer-events:none}
-.game:before{z-index:1;background:linear-gradient(90deg,#0b0a13a8 0%,transparent 30%,transparent 72%,#0b0a1380 100%),linear-gradient(180deg,#09081255 0%,transparent 46%,#0b0912c7 100%)}
+/* Keep the scene art's original framing and color; the dialogue already carries its own contrast. */
+.game{background-size:contain;background-position:center}
+.game:before{z-index:1;background:none}
 .game>*{z-index:2}.hud{height:9%;padding-inline:3.5%;background:linear-gradient(180deg,#11101bd9,#11101b9c);backdrop-filter:blur(3px)}
 .hud nav{gap:clamp(14px,2.2vw,34px);padding-inline:2%;}.hud nav span{letter-spacing:.04em;text-shadow:0 2px 2px #000}.hud button{border-radius:2px;font-size:clamp(9px,1vw,13px);letter-spacing:.08em}
 .philosopher{right:20%;bottom:27%;height:52%;max-width:35%;filter:drop-shadow(0 18px 8px #08070acc) drop-shadow(0 0 9px #f1c77a33)}
