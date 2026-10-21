@@ -107,7 +107,10 @@ async def send_message(session_id: str, request: ChatRequest) -> dict:
     belief = None
     if result.get("persuaded") and state.philosopher not in state.persuaded:
         belief = str(result.get("belief") or "a stated commitment")[:200]
-        state.persuaded.append(state.philosopher)
+        defeated = state.philosopher
+        state.conversation_histories[defeated] = [dict(item) for item in state.messages]
+        state.persuaded.append(defeated)
+        state.messages = []
         state.philosopher_index += 1
         advanced = True
     audit_event(

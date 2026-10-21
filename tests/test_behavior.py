@@ -58,6 +58,37 @@ class ConversationBehaviorTests(unittest.TestCase):
         finally:
             api.SESSIONS.pop(session_id, None)
 
+    def test_encounter_history_is_separated_on_victory(self) -> None:
+        session_id = "history-separation-test"
+        state = agents.GameState(session_id=session_id, messages=[
+            {"role": "assistant", "content": "Plato greets you."},
+            {"role": "user", "content": "Plato challenge."},
+        ])
+        api.SESSIONS[session_id] = state
+        philosopher_calls = []
+
+        async def philosopher_stub(current, message, budget):
+            philosopher_calls.append((current.philosopher, list(current.messages)))
+            return ("A concession." if current.philosopher == "plato" else "Aristotle replies."), 1
+
+        async def evaluator_stub(current, message, reply, budget):
+            return {"persuaded": current.philosopher == "plato", "reason": "revision", "belief": "claim"}
+
+        try:
+            with patch.object(api, "philosopher_turn", new=AsyncMock(side_effect=philosopher_stub)), patch.object(api, "evaluate", new=AsyncMock(side_effect=evaluator_stub)):
+                client = TestClient(api.app)
+                first = client.post(f"/api/sessions/{session_id}/messages", json={"message": "A decisive objection."})
+                self.assertEqual(first.status_code, 200)
+                self.assertEqual(state.philosopher, "aristotle")
+                self.assertEqual(state.messages, [])
+                self.assertIn("plato", state.conversation_histories)
+                second = client.post(f"/api/sessions/{session_id}/messages", json={"message": "Aristotle challenge."})
+                self.assertEqual(second.status_code, 200)
+                self.assertEqual(philosopher_calls[1][0], "aristotle")
+                self.assertEqual(philosopher_calls[1][1], [])
+        finally:
+            api.SESSIONS.pop(session_id, None)
+
 
 if __name__ == "__main__":
     unittest.main()
