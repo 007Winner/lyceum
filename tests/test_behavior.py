@@ -89,6 +89,33 @@ class ConversationBehaviorTests(unittest.TestCase):
         finally:
             api.SESSIONS.pop(session_id, None)
 
+    def test_all_five_encounters_keep_isolated_active_context(self) -> None:
+        session_id = "all-history-separation-test"
+        state = agents.GameState(session_id=session_id, messages=[{"role": "assistant", "content": "Opening."}])
+        api.SESSIONS[session_id] = state
+        calls = []
+
+        async def philosopher_stub(current, message, budget):
+            calls.append((current.philosopher, [item["content"] for item in current.messages]))
+            return "A substantive revision.", 1
+
+        async def evaluator_stub(current, message, reply, budget):
+            return {"persuaded": True, "reason": "revision", "belief": "claim"}
+
+        try:
+            with patch.object(api, "philosopher_turn", new=AsyncMock(side_effect=philosopher_stub)), patch.object(api, "evaluate", new=AsyncMock(side_effect=evaluator_stub)):
+                client = TestClient(api.app)
+                for philosopher in PHILOSOPHERS:
+                    response = client.post(f"/api/sessions/{session_id}/messages", json={"message": f"{philosopher} argument"})
+                    self.assertEqual(response.status_code, 200)
+                    self.assertEqual(state.messages, [])
+                self.assertEqual([item[0] for item in calls], list(PHILOSOPHERS))
+                for _, context in calls[1:]:
+                    self.assertEqual(context, [])
+                self.assertEqual(set(state.conversation_histories), set(PHILOSOPHERS))
+        finally:
+            api.SESSIONS.pop(session_id, None)
+
 
 if __name__ == "__main__":
     unittest.main()
