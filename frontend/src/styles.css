@@ -33,8 +33,9 @@
 /* Bright, welcoming adventure scenes and title screen. */
 :root{background:#f1d79b}
 .game{background-color:#efd181}
-.game:before,.game:after{content:none;background:none;filter:none}
-.title-screen{background-color:#f1d79b;background-image:url('/assets/backgrounds/athens.png');background-position:center;background-size:cover}
+.game:before{content:'';background:linear-gradient(90deg,#15243a55 0%,#15243a00 24%,#15243a00 76%,#15243a33 100%),linear-gradient(180deg,#47392226 0%,transparent 24%,transparent 72%,#47392240 100%)}
+.game:after{content:none;background:none;filter:none}
+.title-screen{background-color:#f1d79b;background-image:linear-gradient(180deg,#503b2530 0%,transparent 25%,transparent 72%,#67452540 100%),url('/assets/backgrounds/athens.png');background-position:center;background-size:cover}
 .title-card{color:#46352d;background:#fff1d9f2;border-color:#b8793d;box-shadow:0 0 0 8px #fff0c988,0 25px 80px #62441f55}
 .title-card small{color:#9b5a30}
 .title-card h1{color:#46352d}
