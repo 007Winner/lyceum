@@ -88,7 +88,9 @@ available source from its recorded URL, use `scripts/build_corpus.py --download`
 and then rebuild the index.
 
 The API exposes `GET /api/health`, `POST /api/sessions`,
-`GET /api/sessions/{id}`, and `POST /api/sessions/{id}/messages`.
+`GET /api/sessions/{id}`, `POST /api/sessions/{id}/messages`, and
+`POST /api/sessions/{id}/continue` for starting the next encounter with a
+fresh conversation context.
 
 ## Evidence
 

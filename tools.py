@@ -16,6 +16,7 @@ class GameState(BaseModel):
     persuaded: list[str] = Field(default_factory=list)
     surrendered: list[str] = Field(default_factory=list)
     messages: list[dict[str, str]] = Field(default_factory=list)
+    transition_pending: bool = False
     budget_requests: int = 0
     budget_output_tokens: int = 0
 

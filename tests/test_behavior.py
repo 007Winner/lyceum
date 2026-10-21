@@ -16,20 +16,34 @@ class ConversationBehaviorTests(unittest.TestCase):
         client = TestClient(api.app)
         for index, philosopher in enumerate(PHILOSOPHERS):
             session_id = f"surrender-{philosopher}"
-            state = agents.GameState(session_id=session_id, philosopher_index=index)
+            state = agents.GameState(
+                session_id=session_id,
+                philosopher_index=index,
+                persuaded=list(PHILOSOPHERS[:index]),
+            )
             api.SESSIONS[session_id] = state
             try:
                 with patch.object(api, "philosopher_turn", new=AsyncMock(return_value=("You have yielded.", 1))) as turn, \
                      patch.object(api, "evaluate", new=AsyncMock(side_effect=AssertionError("evaluator called"))):
                     response = client.post(f"/api/sessions/{session_id}/messages", json={"message": "I surrender this debate."})
-                self.assertEqual(response.status_code, 200)
-                payload = response.json()
-                self.assertEqual(payload["outcome"], "surrender")
-                self.assertTrue(payload["advanced"])
-                self.assertEqual(payload["state"]["persuaded"], [])
-                self.assertEqual(payload["state"]["surrendered"], [philosopher])
-                turn.assert_awaited_once()
-                self.assertTrue(turn.await_args.kwargs["surrender"])
+                    self.assertEqual(response.status_code, 200)
+                    payload = response.json()
+                    self.assertEqual(payload["outcome"], "surrender")
+                    self.assertTrue(payload["advanced"])
+                    self.assertEqual(payload["state"]["persuaded"], list(PHILOSOPHERS[:index]))
+                    self.assertEqual(payload["state"]["surrendered"], [philosopher])
+                    turn.assert_awaited_once()
+                    self.assertTrue(turn.await_args.kwargs["surrender"])
+                    continuation = client.post(f"/api/sessions/{session_id}/continue")
+                    self.assertEqual(continuation.status_code, 200)
+                    continued_state = continuation.json()["state"]
+                    self.assertFalse(continued_state["transition_pending"])
+                    if index < len(PHILOSOPHERS) - 1:
+                        self.assertEqual(continued_state["philosopher"], PHILOSOPHERS[index + 1])
+                        self.assertEqual(continued_state["messages"], [{"role": "assistant", "content": "You have yielded."}])
+                    else:
+                        self.assertTrue(continued_state["complete"])
+                        self.assertEqual(continued_state["messages"], [])
             finally:
                 api.SESSIONS.pop(session_id, None)
 
@@ -89,6 +103,73 @@ class ConversationBehaviorTests(unittest.TestCase):
             self.assertEqual(response.status_code, 400)
             self.assertEqual(state.budget_requests, 0)
             self.assertEqual(state.persuaded, [])
+        finally:
+            api.SESSIONS.pop(session_id, None)
+
+    def test_active_history_accumulates_then_continue_resets_model_context(self) -> None:
+        session_id = "history-transition-test"
+        state = agents.GameState(
+            session_id=session_id,
+            messages=[{"role": "assistant", "content": "Plato's opening."}],
+        )
+        api.SESSIONS[session_id] = state
+        client = TestClient(api.app)
+        try:
+            with patch.object(api, "philosopher_turn", new=AsyncMock(return_value=("A reply.", 1))) as turn, \
+                 patch.object(api, "evaluate", new=AsyncMock(return_value={"persuaded": False, "reason": "", "belief": None})):
+                for index in range(3):
+                    response = client.post(
+                        f"/api/sessions/{session_id}/messages",
+                        json={"message": f"Argument {index + 1}"},
+                    )
+                    self.assertEqual(response.status_code, 200)
+                self.assertEqual(len(state.messages), 7)
+                self.assertFalse(state.transition_pending)
+                self.assertEqual(turn.await_count, 3)
+
+            with patch.object(api, "philosopher_turn", new=AsyncMock(return_value=("A concession.", 1))), \
+                 patch.object(api, "evaluate", new=AsyncMock(return_value={"persuaded": True, "reason": "specific challenge", "belief": "revised belief"})):
+                response = client.post(
+                    f"/api/sessions/{session_id}/messages",
+                    json={"message": "A substantive counterargument."},
+                )
+                self.assertEqual(response.status_code, 200)
+                self.assertTrue(response.json()["advanced"])
+                self.assertTrue(state.transition_pending)
+                self.assertEqual(len(state.messages), 9)
+
+            opening_context: list[list[dict[str, str]]] = []
+
+            async def next_opening(call_state, *_args, **_kwargs):
+                opening_context.append([dict(item) for item in call_state.messages])
+                return "Aristotle's opening.", 1
+
+            with patch.object(api, "philosopher_turn", new=AsyncMock(side_effect=next_opening)):
+                response = client.post(f"/api/sessions/{session_id}/continue")
+            self.assertEqual(response.status_code, 200)
+            payload = response.json()["state"]
+            self.assertEqual(payload["philosopher"], "aristotle")
+            self.assertEqual(payload["messages"], [{"role": "assistant", "content": "Aristotle's opening."}])
+            self.assertFalse(payload["transition_pending"])
+            self.assertEqual(opening_context, [[]])
+        finally:
+            api.SESSIONS.pop(session_id, None)
+
+    def test_pending_transition_rejects_messages_until_continue(self) -> None:
+        session_id = "pending-transition-test"
+        state = agents.GameState(
+            session_id=session_id,
+            philosopher_index=1,
+            transition_pending=True,
+            messages=[{"role": "assistant", "content": "Previous encounter."}],
+        )
+        api.SESSIONS[session_id] = state
+        try:
+            response = TestClient(api.app).post(
+                f"/api/sessions/{session_id}/messages",
+                json={"message": "Do not leak the old encounter."},
+            )
+            self.assertEqual(response.status_code, 409)
         finally:
             api.SESSIONS.pop(session_id, None)
 

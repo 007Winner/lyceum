@@ -95,6 +95,8 @@ async def send_message(session_id: str, request: ChatRequest) -> dict:
         raise HTTPException(404, "Session not found")
     if state.complete:
         raise HTTPException(409, "The Lyceum has been completed.")
+    if state.transition_pending:
+        raise HTTPException(409, "Continue to the next encounter before speaking again.")
     message = validate_player_message(request.message)
     injection_attempt = looks_like_prompt_injection(message)
     if injection_attempt:
@@ -123,12 +125,14 @@ async def send_message(session_id: str, request: ChatRequest) -> dict:
     if surrender and state.philosopher not in state.surrendered and state.philosopher not in state.persuaded:
         state.surrendered.append(state.philosopher)
         state.philosopher_index += 1
+        state.transition_pending = True
         advanced = True
         outcome = "surrender"
     elif result and result.get("persuaded") and state.philosopher not in state.persuaded:
         belief = str(result.get("belief") or "a stated commitment")[:200]
         state.persuaded.append(state.philosopher)
         state.philosopher_index += 1
+        state.transition_pending = True
         advanced = True
         outcome = "victory"
     audit_event(
@@ -140,3 +144,41 @@ async def send_message(session_id: str, request: ChatRequest) -> dict:
         requests=budget.requests,
     )
     return {"reply": display_reply, "evaluation": result, "advanced": advanced, "outcome": outcome, "belief": belief, "state": public_state(state)}
+
+
+@app.post("/api/sessions/{session_id}/continue")
+async def continue_session(session_id: str) -> dict:
+    """Commit the UI transition and open a fresh conversation for the next philosopher."""
+    state = SESSIONS.get(session_id)
+    if not state:
+        raise HTTPException(404, "Session not found")
+    if not state.transition_pending:
+        raise HTTPException(409, "There is no pending encounter transition.")
+
+    if state.complete:
+        state.messages = []
+        state.transition_pending = False
+        return {"state": public_state(state)}
+
+    # Reset the model context before generating the next opening. If the model
+    # call fails, the empty context and pending flag make a retry safe.
+    state.messages = []
+    budget = Budget(requests=state.budget_requests, output_tokens=state.budget_output_tokens)
+    try:
+        opening, _ = await philosopher_turn(
+            state,
+            "A visitor has just entered the room. Greet them naturally, as yourself.",
+            budget,
+        )
+    except AgentCallError as exc:
+        state.budget_requests = budget.requests
+        state.budget_output_tokens = budget.output_tokens
+        audit_event(AUDIT_PATH, "philosopher_model_error", session_id=session_id, philosopher=state.philosopher)
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+    state.messages.append({"role": "assistant", "content": visible_reply(opening)})
+    state.budget_requests = budget.requests
+    state.budget_output_tokens = budget.output_tokens
+    state.transition_pending = False
+    audit_event(AUDIT_PATH, "encounter_started", session_id=session_id, philosopher=state.philosopher)
+    return {"state": public_state(state)}
