@@ -167,7 +167,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .philosopher.thinking { animation: think .7s ease-in-out infinite; }
 .player {
   left: 7%;
-  bottom: 30%;
+  bottom: 29.5%;
   height: 32%;
   max-width: 26%;
   filter: drop-shadow(3px 4px 0 #17243acc) drop-shadow(0 0 2px #e5c77d55);
@@ -297,7 +297,7 @@ button { -webkit-tap-highlight-color: transparent; }
   .nameplate { top: 10%; right: 4%; min-width: 126px; padding: 7px 10px; font-size: 18px; }
   .nameplate small { margin-top: 4px; font-size: 9px; }
   .philosopher { right: 5%; bottom: 34%; height: 38%; max-width: 52%; }
-  .player { left: 5%; bottom: 39%; height: 25%; max-width: 32%; }
+  .player { left: 5%; bottom: 38.5%; height: 25%; max-width: 32%; }
   .dialogue { left: 3%; right: 3%; bottom: .75%; height: 39%; min-height: 205px; padding: 9px; }
   .dialogue p { max-width: 100%; font-size: 15px; line-height: 1.3; }
   .dialogue form { gap: 6px; }
@@ -309,7 +309,7 @@ button { -webkit-tap-highlight-color: transparent; }
   .dialogue { height: 31%; min-height: 155px; }
   .dialogue p { font-size: 14px; }
   .philosopher { bottom: 22%; height: 48%; }
-  .player { bottom: 30%; height: 29%; }
+  .player { bottom: 29.5%; height: 29%; }
 }
 
 @media (max-width: 600px) {
