@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 
 :root {
   --navy: #17243a;
@@ -12,7 +12,7 @@
   --gold: #c9964c;
   --gold-light: #f0c875;
   --ink: #1b2331;
-  font-family: 'Pixelify Sans', 'Trebuchet MS', sans-serif;
+  font-family: 'VT323', 'Courier New', monospace;
   color: var(--parchment-light);
   background: var(--navy-deep);
   font-synthesis: none;
