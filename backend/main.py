@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 import uuid
-import hashlib
-import re
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -107,20 +105,9 @@ async def send_message(session_id: str, request: ChatRequest) -> dict:
     state.budget_output_tokens = budget.output_tokens
     advanced = False
     belief = None
-    philosopher = state.philosopher
-    state.conviction.setdefault(philosopher, 100)
-    # Exact repeated submissions cannot farm conviction loss. The evaluator
-    # remains the sole authority for both progress classification and victory.
-    fingerprint = hashlib.sha256(re.sub(r"\s+", " ", message.strip().lower()).encode("utf-8")).hexdigest()
-    progress_level = str(result.get("progress_level", "none"))
-    if progress_level in {"minor", "substantial"} and fingerprint not in state.progress_fingerprints:
-        state.progress_fingerprints.append(fingerprint)
-        deduction = 8 if progress_level == "minor" else 20
-        state.conviction[philosopher] = max(10, state.conviction[philosopher] - deduction)
-    if result.get("persuaded") and philosopher not in state.persuaded:
+    if result.get("persuaded") and state.philosopher not in state.persuaded:
         belief = str(result.get("belief") or "a stated commitment")[:200]
-        state.persuaded.append(philosopher)
-        state.conviction[philosopher] = 0
+        state.persuaded.append(state.philosopher)
         state.philosopher_index += 1
         advanced = True
     audit_event(

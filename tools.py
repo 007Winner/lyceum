@@ -5,8 +5,6 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from pathlib import Path
 
-
-
 from pydantic import BaseModel, Field
 
 PHILOSOPHERS = ("plato", "aristotle", "machiavelli", "hume", "kant")
@@ -19,8 +17,6 @@ class GameState(BaseModel):
     messages: list[dict[str, str]] = Field(default_factory=list)
     budget_requests: int = 0
     budget_output_tokens: int = 0
-    conviction: dict[str, int] = Field(default_factory=lambda: {name: 100 for name in PHILOSOPHERS})
-    progress_fingerprints: list[str] = Field(default_factory=list)
 
     @property
     def philosopher(self) -> str:
