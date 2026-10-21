@@ -15,7 +15,7 @@
 .hud nav{gap:clamp(14px,2.2vw,34px);padding-inline:2%;}.hud nav span{letter-spacing:.04em;text-shadow:0 2px 2px #000}.hud button{border-radius:2px;font-size:clamp(9px,1vw,13px);letter-spacing:.08em}
 .philosopher{right:20%;bottom:27%;height:52%;max-width:35%;filter:drop-shadow(0 18px 8px #08070acc) drop-shadow(0 0 9px #f1c77a33)}
 .player{left:8%;bottom:20%;height:34%;max-width:25%;filter:drop-shadow(0 18px 9px #030208) drop-shadow(0 0 5px #b5c9d455)}
-.nameplate{top:7%;right:52%;left:auto;width:clamp(220px,25vw,340px);padding:1.25% 1.7%;background:#171225e8;box-shadow:5px 5px 0 #09070c88}
+.nameplate{top:7%;left:6%;right:auto;width:clamp(220px,25vw,340px);padding:1.25% 1.7%;background:#171225e8;box-shadow:5px 5px 0 #09070c88}
 .dialogue{left:5%;right:5%;bottom:3.5%;height:26%;padding:1.15%;background:linear-gradient(135deg,#f5e5c1,#e7cf9e);box-shadow:0 0 0 2px #d6ad62,0 10px 0 #07060baa}
 .dialogue p{max-width:92%;font-size:clamp(12px,1.18vw,17px);line-height:1.5}.dialogue form{height:35%}
 .game .hud{display:none}.game .stage{height:100%}
@@ -32,6 +32,6 @@
 .dialogue > .transcript{flex:1 1 auto;height:0;max-height:100%;min-height:0;overflow-y:scroll;overscroll-behavior:contain;scrollbar-gutter:stable;scrollbar-width:thin;scrollbar-color:#8b2940 #d8bd89;}
 
 .nameplate .conviction{margin-top:.8em;width:100%;font:500 clamp(8px,.7vw,11px) 'DM Mono';letter-spacing:.06em;color:#f5dca7}.conviction>span{display:inline-block}.conviction>b{float:right;font-weight:500}.conviction>i{display:block;clear:both;height:12px;margin-top:7px;padding:1px;background:#0b0910;border:1px solid #d1a155;font-style:normal}.conviction>i em{display:block;height:100%;background:#65b85f;transition:width .7s ease,background-color .4s ease}.conviction-medium>i em{background:#d7ae48}.conviction-low>i em{background:#bd4b46}.conviction-low{animation:conviction-pulse 1.8s ease-in-out infinite}@keyframes conviction-pulse{50%{filter:brightness(1.25)}}
-@media(max-aspect-ratio:1/1){.nameplate{top:4%;right:53%;width:min(43%,240px);padding:2%}.conviction>i{height:10px}}
+@media(max-aspect-ratio:1/1){.nameplate{top:4%;left:4%;width:min(47%,280px);padding:2%}.conviction>i{height:10px}}
 
 .nameplate .conviction small{display:block;margin-top:.4em;color:#f7d799;font-size:.78em;letter-spacing:.04em;white-space:nowrap}.conviction-drop>i em{animation:conviction-drop .8s ease-out}.conviction-rise>i em{animation:conviction-rise .8s ease-out}@keyframes conviction-drop{50%{filter:brightness(1.8);box-shadow:0 0 8px #e06b4c}}@keyframes conviction-rise{50%{filter:brightness(1.6);box-shadow:0 0 8px #f1d26b}}

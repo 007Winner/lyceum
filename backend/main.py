@@ -153,12 +153,4 @@ async def send_message(session_id: str, request: ChatRequest) -> dict:
         advanced=advanced,
         requests=budget.requests,
     )
-    return {
-        "reply": display_reply,
-        "evaluation": result,
-        "advanced": advanced,
-        "belief": belief,
-        "defeated_philosopher": philosopher if advanced else None,
-        "defeated_conviction": state.conviction[philosopher] if advanced else None,
-        "state": public_state(state),
-    }
+    return {"reply": display_reply, "evaluation": result, "advanced": advanced, "belief": belief, "state": public_state(state)}
