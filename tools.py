@@ -15,7 +15,6 @@ class GameState(BaseModel):
     philosopher_index: int = 0
     persuaded: list[str] = Field(default_factory=list)
     messages: list[dict[str, str]] = Field(default_factory=list)
-    conversation_histories: dict[str, list[dict[str, str]]] = Field(default_factory=dict)
     budget_requests: int = 0
     budget_output_tokens: int = 0
 
