@@ -135,7 +135,8 @@ class ConversationBehaviorTests(unittest.TestCase):
                 )
                 self.assertEqual(response.status_code, 200)
                 self.assertTrue(response.json()["advanced"])
-                self.assertTrue(state.transition_pending)
+                self.assertTrue(state.victory_pending)
+                self.assertFalse(state.transition_pending)
                 self.assertEqual(len(state.messages), 9)
 
             opening_context: list[list[dict[str, str]]] = []
@@ -150,8 +151,44 @@ class ConversationBehaviorTests(unittest.TestCase):
             payload = response.json()["state"]
             self.assertEqual(payload["philosopher"], "aristotle")
             self.assertEqual(payload["messages"], [{"role": "assistant", "content": "Aristotle's opening."}])
+            self.assertFalse(payload["victory_pending"])
             self.assertFalse(payload["transition_pending"])
             self.assertEqual(opening_context, [[]])
+        finally:
+            api.SESSIONS.pop(session_id, None)
+
+    def test_post_victory_message_keeps_encounter_and_skips_evaluator(self) -> None:
+        session_id = "post-victory-test"
+        state = agents.GameState(
+            session_id=session_id,
+            messages=[{"role": "assistant", "content": "Plato's opening."}],
+        )
+        api.SESSIONS[session_id] = state
+        client = TestClient(api.app)
+        try:
+            evaluator = AsyncMock(return_value={"persuaded": True, "reason": "won", "belief": "revised belief"})
+            with patch.object(api, "philosopher_turn", new=AsyncMock(return_value=("A concession.", 1))), \
+                 patch.object(api, "evaluate", new=evaluator):
+                won = client.post(f"/api/sessions/{session_id}/messages", json={"message": "A winning argument."})
+            self.assertEqual(won.status_code, 200)
+            self.assertEqual(won.json()["outcome"], "victory")
+            self.assertTrue(state.victory_pending)
+            self.assertFalse(state.transition_pending)
+            self.assertEqual(state.philosopher, "plato")
+
+            with patch.object(api, "philosopher_turn", new=AsyncMock(return_value=("Continue your inquiry.", 1))) as turn, \
+                 patch.object(api, "evaluate", new=AsyncMock(side_effect=AssertionError("evaluator called after victory"))):
+                follow_up = client.post(
+                    f"/api/sessions/{session_id}/messages",
+                    json={"message": "What else follows from your reconsideration?"},
+                )
+            self.assertEqual(follow_up.status_code, 200)
+            self.assertFalse(follow_up.json()["advanced"])
+            self.assertEqual(state.philosopher, "plato")
+            self.assertTrue(state.victory_pending)
+            self.assertEqual(len(state.messages), 5)
+            turn.assert_awaited_once()
+            evaluator.assert_awaited_once()
         finally:
             api.SESSIONS.pop(session_id, None)
 

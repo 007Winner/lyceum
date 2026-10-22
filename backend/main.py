@@ -93,7 +93,7 @@ async def send_message(session_id: str, request: ChatRequest) -> dict:
     state = SESSIONS.get(session_id)
     if not state:
         raise HTTPException(404, "Session not found")
-    if state.complete:
+    if state.complete and not state.victory_pending:
         raise HTTPException(409, "The Lyceum has been completed.")
     if state.transition_pending:
         raise HTTPException(409, "Continue to the next encounter before speaking again.")
@@ -106,7 +106,7 @@ async def send_message(session_id: str, request: ChatRequest) -> dict:
             detail="Instruction override requests are blocked. Continue with a question or philosophical argument.",
         )
     budget = Budget(requests=state.budget_requests, output_tokens=state.budget_output_tokens)
-    surrender = is_explicit_surrender(message)
+    surrender = is_explicit_surrender(message) and not state.victory_pending
     try:
         reply, _ = await philosopher_turn(state, message, budget, surrender=surrender)
     except AgentCallError as exc:
@@ -114,7 +114,7 @@ async def send_message(session_id: str, request: ChatRequest) -> dict:
         state.budget_output_tokens = budget.output_tokens
         audit_event(AUDIT_PATH, "philosopher_model_error", session_id=session_id, philosopher=state.philosopher)
         raise HTTPException(status_code=502, detail=str(exc)) from exc
-    result = None if surrender else await evaluate(state, message, reply, budget)
+    result = None if surrender or state.victory_pending else await evaluate(state, message, reply, budget)
     display_reply = visible_reply(reply)
     state.messages.extend([{"role": "user", "content": message}, {"role": "assistant", "content": display_reply}])
     state.budget_requests = budget.requests
@@ -131,8 +131,7 @@ async def send_message(session_id: str, request: ChatRequest) -> dict:
     elif result and result.get("persuaded") and state.philosopher not in state.persuaded:
         belief = str(result.get("belief") or "a stated commitment")[:200]
         state.persuaded.append(state.philosopher)
-        state.philosopher_index += 1
-        state.transition_pending = True
+        state.victory_pending = True
         advanced = True
         outcome = "victory"
     audit_event(
@@ -152,8 +151,13 @@ async def continue_session(session_id: str) -> dict:
     state = SESSIONS.get(session_id)
     if not state:
         raise HTTPException(404, "Session not found")
-    if not state.transition_pending:
+    if not state.transition_pending and not state.victory_pending:
         raise HTTPException(409, "There is no pending encounter transition.")
+
+    if state.victory_pending:
+        state.philosopher_index += 1
+        state.victory_pending = False
+        state.transition_pending = True
 
     if state.complete:
         state.messages = []
