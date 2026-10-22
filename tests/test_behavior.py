@@ -216,12 +216,13 @@ class ConversationBehaviorTests(unittest.TestCase):
             session_id=campaign_id,
             philosopher_index=1,
             persuaded=["plato"],
+            surrendered=["aristotle"],
             messages=[{"role": "assistant", "content": "Aristotle's opening."}],
         )
         api.SESSIONS[campaign_id] = campaign
         client = TestClient(api.app)
         try:
-            locked = client.post(f"/api/sessions/{campaign_id}/revisit/aristotle")
+            locked = client.post(f"/api/sessions/{campaign_id}/revisit/hume")
             self.assertEqual(locked.status_code, 403)
 
             with patch.object(api, "philosopher_turn", new=AsyncMock(return_value=("Plato revisited.", 1))):
@@ -233,6 +234,11 @@ class ConversationBehaviorTests(unittest.TestCase):
             self.assertEqual(revisit["philosopher"], "plato")
             self.assertEqual(campaign.persuaded, ["plato"])
             self.assertEqual(campaign.messages, [{"role": "assistant", "content": "Aristotle's opening."}])
+
+            with patch.object(api, "philosopher_turn", new=AsyncMock(return_value=("Aristotle revisited.", 1))):
+                surrendered_revisit = client.post(f"/api/sessions/{campaign_id}/revisit/aristotle")
+            self.assertEqual(surrendered_revisit.status_code, 200)
+            self.assertEqual(surrendered_revisit.json()["state"]["philosopher"], "aristotle")
 
             with patch.object(api, "philosopher_turn", new=AsyncMock(return_value=("Keep questioning.", 1))) as turn, \
                  patch.object(api, "evaluate", new=AsyncMock(side_effect=AssertionError("revisit evaluator called"))):

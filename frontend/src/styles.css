@@ -124,8 +124,8 @@ button { -webkit-tap-highlight-color: transparent; }
 .nameplate {
   position: absolute;
   z-index: 4;
-  top: 10%;
-  right: 5%;
+  top: 12%;
+  right: 22%;
   min-width: 150px;
   padding: 8px 14px 7px;
   color: var(--parchment-light);
@@ -176,6 +176,7 @@ button { -webkit-tap-highlight-color: transparent; }
 }
 .progression-node img { width: clamp(20px, 2.2vw, 32px); height: clamp(20px, 2.2vw, 32px); object-fit: contain; image-rendering: pixelated; }
 .progression-node.completed { color: var(--parchment-light); border-color: var(--gold); cursor: pointer; }
+.progression-node.pending { cursor: wait; opacity: .65; }
 .progression-node.current { color: var(--gold-light); border-color: var(--gold-light); box-shadow: 0 0 0 1px var(--gold); }
 .progression-node.locked { opacity: .45; filter: grayscale(.85); }
 .progression-line { flex: 1 1 auto; height: 3px; min-width: 5px; background: var(--navy); }
@@ -289,7 +290,7 @@ button { -webkit-tap-highlight-color: transparent; }
   position: absolute;
   z-index: 6;
   top: 2.5%;
-  right: 3%;
+  left: 3%;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -308,6 +309,12 @@ button { -webkit-tap-highlight-color: transparent; }
 .music-control input[type='range']::-moz-range-track { height: 6px; background: var(--parchment-shadow); border: 2px solid var(--navy); }
 .music-control input[type='range']::-moz-range-thumb { width: 11px; height: 11px; background: var(--gold-light); border: 2px solid var(--navy); border-radius: 0; }
 .music-status { color: var(--gold-light); font-size: .82em; white-space: nowrap; }
+.options-wrap { position: fixed; z-index: 13; top: 2.5%; right: 3%; }
+.options-toggle { padding: 4px 7px; color: var(--parchment-light); background: var(--burgundy); border: 2px solid var(--navy); cursor: pointer; font-size: inherit; font-weight: 700; letter-spacing: .04em; }
+.options-menu { position: absolute; z-index: 12; top: calc(100% + 8px); right: 0; display: grid; min-width: 166px; max-width: calc(100vw - 6%); padding: 5px; background: var(--parchment); border: 3px solid var(--navy); box-shadow: 4px 4px 0 #101a2ccc; }
+.options-menu button { padding: 8px 10px; color: var(--parchment-light); background: var(--burgundy); border: 2px solid var(--navy); cursor: pointer; font-size: clamp(11px, .85vw, 14px); font-weight: 700; text-align: left; }
+.options-menu button + button { margin-top: 5px; }
+.options-menu button:hover { background: var(--burgundy-dark); }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
 .error { position: absolute; z-index: 8; left: 5%; bottom: 32%; max-width: 90%; padding: 8px 11px; color: var(--parchment-light); background: var(--burgundy-dark); border: 3px solid var(--gold); }
@@ -333,10 +340,13 @@ button { -webkit-tap-highlight-color: transparent; }
   .progression-node img { width: 22px; height: 22px; }
   .progression-node span { overflow: hidden; text-overflow: ellipsis; }
   .return-journey { top: 10%; left: 3%; padding: 5px 7px; }
-  .music-control { top: 2%; right: 3%; padding: 5px; }
+  .music-control { top: 2%; left: 3%; padding: 5px; }
   .music-control input[type='range'] { width: 58px; }
+  .options-toggle { padding: 3px 5px; font-size: 9px; }
+  .options-menu { min-width: 145px; }
+  .options-wrap { top: 2%; right: 3%; }
   .music-status { display: none; }
-  .nameplate { top: 10%; right: 4%; min-width: 126px; padding: 7px 10px; font-size: 18px; }
+  .nameplate { top: 21%; right: 15%; min-width: 126px; padding: 7px 10px; font-size: 18px; }
   .nameplate small { margin-top: 4px; font-size: 9px; }
   .philosopher { right: 5%; bottom: 34%; height: 38%; max-width: 52%; }
   .player { left: 5%; bottom: 38.5%; height: 25%; max-width: 32%; }
@@ -350,6 +360,7 @@ button { -webkit-tap-highlight-color: transparent; }
 @media (max-height: 640px) and (orientation: landscape) {
   .dialogue { height: 34%; min-height: 170px; }
   .dialogue p { font-size: 14px; }
+  .nameplate { top: 20%; right: 20%; }
   .philosopher { bottom: 22%; height: 48%; }
   .player { bottom: 29.5%; height: 29%; }
 }

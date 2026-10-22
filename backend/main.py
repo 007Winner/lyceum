@@ -94,8 +94,8 @@ async def create_revisit(session_id: str, philosopher: str) -> dict:
         raise HTTPException(404, "Campaign session not found")
     if philosopher not in PHILOSOPHERS:
         raise HTTPException(404, "Philosopher not found")
-    if philosopher not in campaign.persuaded:
-        raise HTTPException(403, "This philosopher has not been persuaded yet.")
+    if philosopher not in campaign.persuaded and philosopher not in campaign.surrendered:
+        raise HTTPException(403, "This philosopher is not available for revisiting yet.")
 
     revisit_id = uuid.uuid4().hex
     revisit = GameState(
