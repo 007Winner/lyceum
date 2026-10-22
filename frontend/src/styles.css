@@ -182,8 +182,8 @@ button { -webkit-tap-highlight-color: transparent; }
   left: 5%;
   right: 5%;
   bottom: 1%;
-  height: 28%;
-  min-height: 184px;
+  height: 32%;
+  min-height: 210px;
   display: flex;
   flex-direction: column;
   padding: clamp(9px, 1vw, 15px);
@@ -214,7 +214,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .dialogue .placeholder { color: #705d4b; font-style: italic; }
 .dialogue .placeholder p { color: #705d4b; }
 
-.dialogue form { display: flex; flex: 0 0 auto; gap: 8px; min-height: 45px; margin-top: 8px; }
+.dialogue form { display: flex; flex: 0 0 auto; gap: 8px; min-height: 45px; margin-top: auto; }
 .dialogue textarea {
   flex: 1 1 auto;
   min-width: 0;
@@ -298,7 +298,7 @@ button { -webkit-tap-highlight-color: transparent; }
   .nameplate small { margin-top: 4px; font-size: 9px; }
   .philosopher { right: 5%; bottom: 34%; height: 38%; max-width: 52%; }
   .player { left: 5%; bottom: 38.5%; height: 25%; max-width: 32%; }
-  .dialogue { left: 3%; right: 3%; bottom: .75%; height: 39%; min-height: 205px; padding: 9px; }
+  .dialogue { left: 3%; right: 3%; bottom: .75%; height: 43%; min-height: 225px; padding: 9px; }
   .dialogue p { max-width: 100%; font-size: 15px; line-height: 1.3; }
   .dialogue form { gap: 6px; }
   .dialogue form button { min-width: 82px; padding: 0 9px; }
@@ -306,7 +306,7 @@ button { -webkit-tap-highlight-color: transparent; }
 }
 
 @media (max-height: 640px) and (orientation: landscape) {
-  .dialogue { height: 31%; min-height: 155px; }
+  .dialogue { height: 34%; min-height: 170px; }
   .dialogue p { font-size: 14px; }
   .philosopher { bottom: 22%; height: 48%; }
   .player { bottom: 29.5%; height: 29%; }
