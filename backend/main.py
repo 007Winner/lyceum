@@ -93,9 +93,9 @@ async def send_message(session_id: str, request: ChatRequest) -> dict:
     state = SESSIONS.get(session_id)
     if not state:
         raise HTTPException(404, "Session not found")
-    if state.complete:
+    if state.complete and not state.encounter_won:
         raise HTTPException(409, "The Lyceum has been completed.")
-    if state.transition_pending:
+    if state.transition_pending and not state.encounter_won:
         raise HTTPException(409, "Continue to the next encounter before speaking again.")
     message = validate_player_message(request.message)
     injection_attempt = looks_like_prompt_injection(message)
@@ -131,8 +131,8 @@ async def send_message(session_id: str, request: ChatRequest) -> dict:
     elif result and result.get("persuaded") and state.philosopher not in state.persuaded:
         belief = str(result.get("belief") or "a stated commitment")[:200]
         state.persuaded.append(state.philosopher)
-        state.philosopher_index += 1
         state.transition_pending = True
+        state.encounter_won = True
         advanced = True
         outcome = "victory"
     audit_event(
@@ -154,6 +154,10 @@ async def continue_session(session_id: str) -> dict:
         raise HTTPException(404, "Session not found")
     if not state.transition_pending:
         raise HTTPException(409, "There is no pending encounter transition.")
+
+    if state.encounter_won:
+        state.philosopher_index += 1
+        state.encounter_won = False
 
     if state.complete:
         state.messages = []
