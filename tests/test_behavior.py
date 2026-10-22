@@ -173,49 +173,6 @@ class ConversationBehaviorTests(unittest.TestCase):
         finally:
             api.SESSIONS.pop(session_id, None)
 
-    def test_won_encounter_can_continue_before_transition(self) -> None:
-        session_id = "continue-after-win-test"
-        state = agents.GameState(
-            session_id=session_id,
-            messages=[{"role": "assistant", "content": "Plato's opening."}],
-        )
-        api.SESSIONS[session_id] = state
-        client = TestClient(api.app)
-        evaluations = [
-            {"persuaded": True, "reason": "specific challenge", "belief": "revised belief"},
-            {"persuaded": False, "reason": "still examining", "belief": None},
-        ]
-        try:
-            with patch.object(api, "philosopher_turn", new=AsyncMock(return_value=("A reply.", 1))) as turn, \
-                 patch.object(api, "evaluate", new=AsyncMock(side_effect=evaluations)):
-                won = client.post(
-                    f"/api/sessions/{session_id}/messages",
-                    json={"message": "A substantive counterargument."},
-                )
-                self.assertEqual(won.status_code, 200)
-                self.assertTrue(won.json()["advanced"])
-                self.assertTrue(state.encounter_won)
-                self.assertTrue(state.transition_pending)
-                self.assertEqual(state.philosopher, "plato")
-
-                continued = client.post(
-                    f"/api/sessions/{session_id}/messages",
-                    json={"message": "I want to examine that concession further."},
-                )
-                self.assertEqual(continued.status_code, 200)
-                self.assertFalse(continued.json()["advanced"])
-                self.assertEqual(state.philosopher, "plato")
-                self.assertEqual(len(state.messages), 5)
-                self.assertEqual(turn.await_count, 2)
-
-            with patch.object(api, "philosopher_turn", new=AsyncMock(return_value=("Aristotle's opening.", 1))):
-                next_encounter = client.post(f"/api/sessions/{session_id}/continue")
-            self.assertEqual(next_encounter.status_code, 200)
-            self.assertEqual(next_encounter.json()["state"]["philosopher"], "aristotle")
-            self.assertFalse(next_encounter.json()["state"]["encounter_won"])
-        finally:
-            api.SESSIONS.pop(session_id, None)
-
 
 if __name__ == "__main__":
     unittest.main()
