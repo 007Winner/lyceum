@@ -210,6 +210,90 @@ class ConversationBehaviorTests(unittest.TestCase):
         finally:
             api.SESSIONS.pop(session_id, None)
 
+    def test_revisit_requires_backend_validated_victory_and_restores_campaign(self) -> None:
+        campaign_id = "campaign-revisit-test"
+        campaign = agents.GameState(
+            session_id=campaign_id,
+            philosopher_index=1,
+            persuaded=["plato"],
+            messages=[{"role": "assistant", "content": "Aristotle's opening."}],
+        )
+        api.SESSIONS[campaign_id] = campaign
+        client = TestClient(api.app)
+        try:
+            locked = client.post(f"/api/sessions/{campaign_id}/revisit/aristotle")
+            self.assertEqual(locked.status_code, 403)
+
+            with patch.object(api, "philosopher_turn", new=AsyncMock(return_value=("Plato revisited.", 1))):
+                opened = client.post(f"/api/sessions/{campaign_id}/revisit/plato")
+            self.assertEqual(opened.status_code, 200)
+            revisit = opened.json()["state"]
+            revisit_id = revisit["session_id"]
+            self.assertTrue(revisit["is_revisit"])
+            self.assertEqual(revisit["philosopher"], "plato")
+            self.assertEqual(campaign.persuaded, ["plato"])
+            self.assertEqual(campaign.messages, [{"role": "assistant", "content": "Aristotle's opening."}])
+
+            with patch.object(api, "philosopher_turn", new=AsyncMock(return_value=("Keep questioning.", 1))) as turn, \
+                 patch.object(api, "evaluate", new=AsyncMock(side_effect=AssertionError("revisit evaluator called"))):
+                response = client.post(f"/api/sessions/{revisit_id}/messages", json={"message": "Tell me more."})
+            self.assertEqual(response.status_code, 200)
+            self.assertFalse(response.json()["advanced"])
+            self.assertEqual(campaign.persuaded, ["plato"])
+            turn.assert_awaited_once()
+
+            restored = client.post(f"/api/sessions/{revisit_id}/return")
+            self.assertEqual(restored.status_code, 200)
+            self.assertEqual(restored.json()["state"]["session_id"], campaign_id)
+            self.assertEqual(restored.json()["state"]["philosopher"], "aristotle")
+            self.assertEqual(restored.json()["state"]["messages"], campaign.messages)
+        finally:
+            api.SESSIONS.pop(campaign_id, None)
+            for session_id in list(api.SESSIONS):
+                if api.SESSIONS[session_id].campaign_session_id == campaign_id:
+                    api.SESSIONS.pop(session_id, None)
+
+    def test_new_campaign_starts_at_plato(self) -> None:
+        with patch.object(api, "philosopher_turn", new=AsyncMock(return_value=("Welcome.", 1))):
+            response = TestClient(api.app).post("/api/sessions")
+        self.assertEqual(response.status_code, 200)
+        state = response.json()
+        self.assertEqual(state["philosopher"], "plato")
+        self.assertEqual(state["philosopher_index"], 0)
+        self.assertEqual(state["persuaded"], [])
+        api.SESSIONS.pop(state["session_id"], None)
+
+    def test_completed_campaign_keeps_all_philosophers_revisitable(self) -> None:
+        campaign_id = "completed-revisit-test"
+        campaign = agents.GameState(session_id=campaign_id, philosopher_index=4, persuaded=list(PHILOSOPHERS))
+        api.SESSIONS[campaign_id] = campaign
+        client = TestClient(api.app)
+        try:
+            with patch.object(api, "philosopher_turn", new=AsyncMock(return_value=("Welcome back.", 1))):
+                for philosopher in PHILOSOPHERS:
+                    response = client.post(f"/api/sessions/{campaign_id}/revisit/{philosopher}")
+                    self.assertEqual(response.status_code, 200)
+                    self.assertTrue(response.json()["state"]["is_revisit"])
+                    self.assertEqual(response.json()["state"]["philosopher"], philosopher)
+            self.assertEqual(campaign.persuaded, list(PHILOSOPHERS))
+        finally:
+            api.SESSIONS.pop(campaign_id, None)
+            for session_id in list(api.SESSIONS):
+                if api.SESSIONS[session_id].campaign_session_id == campaign_id:
+                    api.SESSIONS.pop(session_id, None)
+
+    def test_campaign_state_survives_refresh_lookup(self) -> None:
+        session_id = "refresh-campaign-test"
+        state = agents.GameState(session_id=session_id, persuaded=["plato"], philosopher_index=1)
+        api.SESSIONS[session_id] = state
+        try:
+            refreshed = TestClient(api.app).get(f"/api/sessions/{session_id}")
+            self.assertEqual(refreshed.status_code, 200)
+            self.assertEqual(refreshed.json()["persuaded"], ["plato"])
+            self.assertEqual(refreshed.json()["philosopher"], "aristotle")
+        finally:
+            api.SESSIONS.pop(session_id, None)
+
 
 if __name__ == "__main__":
     unittest.main()
